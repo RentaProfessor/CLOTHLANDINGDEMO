@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLOTH - Premium Streetwear</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>CLOTH</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#collection">Collection</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-video-container">
+            <video autoplay muted loop class="hero-video">
+                <source src="Videos/5911887-compressed.mp4" type="video/mp4">
+            </video>
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">REDEFINE <span class="accent">STYLE</span></h1>
+            <p class="hero-subtitle">Premium streetwear for the modern individual</p>
+            <div class="hero-buttons">
+                <a href="#collection" class="btn btn-primary">Shop Now</a>
+                <a href="#about" class="btn btn-secondary">Discover</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- Collection Section -->
+    <section id="collection" class="collection">
+        <div class="container">
+            <div class="section-header">
+                <h2>Latest Collection</h2>
+                <p>Discover our newest pieces</p>
+            </div>
+            <div class="collection-grid">
+                <div class="collection-item">
+                    <div class="item-image">
+                        <div class="placeholder-image"></div>
+                    </div>
+                    <div class="item-info">
+                        <h3>Urban Hoodie</h3>
+                        <p class="price">$89.99</p>
+                    </div>
+                </div>
+                <div class="collection-item">
+                    <div class="item-image">
+                        <div class="placeholder-image"></div>
+                    </div>
+                    <div class="item-info">
+                        <h3>Street Tee</h3>
+                        <p class="price">$49.99</p>
+                    </div>
+                </div>
+                <div class="collection-item">
+                    <div class="item-image">
+                        <div class="placeholder-image"></div>
+                    </div>
+                    <div class="item-info">
+                        <h3>Denim Jacket</h3>
+                        <p class="price">$129.99</p>
+                    </div>
+                </div>
+                <div class="collection-item">
+                    <div class="item-image">
+                        <div class="placeholder-image"></div>
+                    </div>
+                    <div class="item-info">
+                        <h3>Cargo Pants</h3>
+                        <p class="price">$79.99</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Showcase Section -->
+    <section class="video-showcase">
+        <div class="video-grid">
+            <div class="video-item">
+                <video autoplay muted loop class="showcase-video">
+                    <source src="Videos/8733251-compressed-25mb.mp4" type="video/mp4">
+                </video>
+                <div class="video-overlay">
+                    <h3>Street Culture</h3>
+                    <p>Embrace the urban lifestyle</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>About <span class="accent">CLOTH</span></h2>
+                    <p>We're more than just clothing. We're a movement. Born from the streets, crafted for the bold. Our pieces blend urban culture with premium quality, creating streetwear that speaks to the individual who refuses to conform.</p>
+                    <p>Every stitch tells a story. Every design reflects the energy of the city. Join the revolution.</p>
+                    <div class="stats">
+                        <div class="stat">
+                            <h3>10K+</h3>
+                            <p>Happy Customers</p>
+                        </div>
+                        <div class="stat">
+                            <h3>50+</h3>
+                            <p>Unique Designs</p>
+                        </div>
+                        <div class="stat">
+                            <h3>100%</h3>
+                            <p>Quality Guaranteed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2>Get In Touch</h2>
+                <p>Ready to join the movement?</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>hello@cloth.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Phone</h4>
+                            <p>+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Location</h4>
+                            <p>Los Angeles, CA</p>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CLOTH</h3>
+                    <p>Redefining streetwear culture</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#collection">Collection</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Shipping</a></li>
+                        <li><a href="#">Returns</a></li>
+                        <li><a href="#">Size Guide</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 CLOTH. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 
