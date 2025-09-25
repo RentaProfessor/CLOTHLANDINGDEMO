@@ -132,14 +132,27 @@ document.addEventListener('DOMContentLoaded', function() {
         const playVideo = () => {
             video.removeAttribute('controls');
             video.controls = false;
+            
+            // Ensure video is visible before playing
+            video.style.opacity = '1';
+            video.classList.add('loaded');
+            
             video.play().then(() => {
-                video.classList.add('loaded');
+                console.log('Video playing successfully');
+                // Keep video visible
+                video.style.opacity = '1';
+                video.style.display = 'block';
             }).catch(() => {
+                console.log('Autoplay blocked, waiting for user interaction');
                 // If autoplay fails, play on user interaction
                 const playOnTouch = () => {
                     video.removeAttribute('controls');
                     video.controls = false;
-                    video.play();
+                    video.style.opacity = '1';
+                    video.play().then(() => {
+                        video.style.opacity = '1';
+                        video.style.display = 'block';
+                    });
                     document.removeEventListener('touchstart', playOnTouch);
                     document.removeEventListener('click', playOnTouch);
                 };
@@ -152,13 +165,44 @@ document.addEventListener('DOMContentLoaded', function() {
         video.addEventListener('loadeddata', playVideo);
         video.addEventListener('canplay', playVideo);
         
-        // Keep removing controls
+        // Keep removing controls and ensure visibility
         setInterval(() => {
             if (video.hasAttribute('controls') || video.controls) {
                 video.removeAttribute('controls');
                 video.controls = false;
             }
+            
+            // Prevent video from going black
+            if (video.readyState >= 2 && !video.paused) {
+                video.style.opacity = '1';
+                video.style.display = 'block';
+            }
         }, 100);
+        
+        // Add more event listeners to debug and fix black screen
+        video.addEventListener('playing', () => {
+            console.log('Video is playing');
+            video.style.opacity = '1';
+            video.style.display = 'block';
+        });
+        
+        video.addEventListener('pause', () => {
+            console.log('Video paused');
+        });
+        
+        video.addEventListener('stalled', () => {
+            console.log('Video stalled - reloading');
+            video.load();
+        });
+        
+        video.addEventListener('error', (e) => {
+            console.log('Video error:', e);
+        });
+        
+        video.addEventListener('emptied', () => {
+            console.log('Video emptied - reloading');
+            video.load();
+        });
     });
     
     // Handle orientation change on mobile
