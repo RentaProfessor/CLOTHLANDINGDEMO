@@ -102,16 +102,16 @@ if (contactForm) {
     });
 }
 
-// Parallax effect for hero section
-window.addEventListener('scroll', function() {
-    const scrolled = window.pageYOffset;
-    const heroVideo = document.querySelector('.hero-video');
-    
-    if (heroVideo) {
-        const rate = scrolled * -0.5;
-        heroVideo.style.transform = `translateY(${rate}px)`;
-    }
-});
+// Parallax effect for hero section (disabled to prevent video conflicts)
+// window.addEventListener('scroll', function() {
+//     const scrolled = window.pageYOffset;
+//     const heroVideo = document.querySelector('.hero-video');
+//     
+//     if (heroVideo) {
+//         const rate = scrolled * -0.5;
+//         heroVideo.style.transform = `translateY(${rate}px)`;
+//     }
+// });
 
 // Ultra-aggressive mobile video autoplay with canvas fallback
 document.addEventListener('DOMContentLoaded', function() {

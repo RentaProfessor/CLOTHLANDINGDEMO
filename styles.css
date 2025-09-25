@@ -249,25 +249,8 @@ video {
     -webkit-transform: translateZ(0);
 }
 
-/* Video touch overlay for mobile interaction */
-.video-touch-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10;
-    background: transparent;
-    cursor: pointer;
-    display: none;
-}
-
-/* Show touch overlay only on mobile/touch devices */
+/* Touch device optimizations for video */
 @media (hover: none) and (pointer: coarse) {
-    .video-touch-overlay {
-        display: block;
-    }
-    
     video {
         pointer-events: none !important;
     }
