@@ -113,19 +113,102 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Add loading animation for videos
+// Enhanced video loading and mobile optimization
 document.addEventListener('DOMContentLoaded', function() {
     const videos = document.querySelectorAll('video');
+    const isMobile = window.innerWidth <= 768;
     
-    videos.forEach(video => {
+    console.log('Found', videos.length, 'videos to load');
+    
+    videos.forEach((video, index) => {
+        console.log(`Video ${index + 1}:`, video.src || 'No direct src');
+        
+        // Add loading class when video data is loaded
         video.addEventListener('loadeddata', function() {
-            this.style.opacity = '1';
+            console.log('Video loaded successfully:', this.currentSrc);
+            this.classList.add('loaded');
         });
         
-        video.addEventListener('loadstart', function() {
-            this.style.opacity = '0';
-            this.style.transition = 'opacity 0.5s ease';
+        // Handle video load errors
+        video.addEventListener('error', function() {
+            console.error('Video failed to load:', this.currentSrc || this.src);
+            // Don't hide the video, just log the error
         });
+        
+        // Log when video starts playing
+        video.addEventListener('play', function() {
+            console.log('Video started playing:', this.currentSrc);
+        });
+        
+        // Log loading states
+        video.addEventListener('loadstart', function() {
+            console.log('Video load started:', this.currentSrc);
+        });
+        
+        video.addEventListener('canplay', function() {
+            console.log('Video can play:', this.currentSrc);
+        });
+        
+        // Mobile-specific optimizations
+        if (isMobile) {
+            // Reduce video quality for mobile
+            video.setAttribute('preload', 'metadata');
+            
+            // Pause videos when not in viewport on mobile to save data
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.play();
+                    } else {
+                        entry.target.pause();
+                    }
+                });
+            }, { threshold: 0.25 });
+            
+            observer.observe(video);
+        } else {
+            // Desktop optimization
+            video.setAttribute('preload', 'auto');
+        }
+        
+        // Enhanced mobile autoplay handling
+        video.addEventListener('canplay', function() {
+            if (this.paused) {
+                this.play().catch(e => {
+                    console.log('Video autoplay prevented:', e);
+                    // Add click handler for mobile autoplay fallback
+                    const playOnInteraction = () => {
+                        this.play().catch(err => console.log('Manual play failed:', err));
+                        document.removeEventListener('touchstart', playOnInteraction);
+                        document.removeEventListener('click', playOnInteraction);
+                    };
+                    document.addEventListener('touchstart', playOnInteraction, { once: true });
+                    document.addEventListener('click', playOnInteraction, { once: true });
+                });
+            }
+        });
+        
+        // Force autoplay on mobile with additional attributes
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('muted', 'true');
+        
+        // Try to play immediately when loaded
+        video.addEventListener('loadeddata', function() {
+            console.log('Video data loaded, attempting autoplay');
+            this.play().catch(e => {
+                console.log('Autoplay failed, will retry on user interaction:', e);
+            });
+        });
+    });
+    
+    // Handle orientation change on mobile
+    window.addEventListener('orientationchange', function() {
+        setTimeout(() => {
+            videos.forEach(video => {
+                video.style.objectFit = 'cover';
+            });
+        }, 100);
     });
 });
 

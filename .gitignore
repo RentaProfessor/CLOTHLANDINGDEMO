@@ -1,1 +1,2 @@
-*.mp4
+# Allow compressed video files for web
+# *.mp4
