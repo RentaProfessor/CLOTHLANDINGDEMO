@@ -136,10 +136,9 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0;
+    opacity: 1;
     background: #000;
     min-height: 100vh;
-    transition: opacity 0.5s ease;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     transform: translateZ(0);
@@ -151,27 +150,79 @@ video::-webkit-media-controls {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
 }
 
 video::-webkit-media-controls-start-playback-button {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
 }
 
 video::-webkit-media-controls-play-button {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
 }
 
 video::-webkit-media-controls-overlay-play-button {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
 }
 
 video::-webkit-media-controls-panel {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+video::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+video::-webkit-media-controls-timeline {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+video::-webkit-media-controls-current-time-display {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+video::-webkit-media-controls-time-remaining-display {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+video::-webkit-media-controls-mute-button {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+video::-webkit-media-controls-volume-slider {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
@@ -180,6 +231,40 @@ video::-webkit-media-controls-panel {
 video {
     outline: none;
     pointer-events: none;
+}
+
+/* Video touch overlay for mobile interaction */
+.video-touch-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background: transparent;
+    cursor: pointer;
+    display: none;
+}
+
+/* Show touch overlay only on mobile/touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .video-touch-overlay {
+        display: block;
+    }
+    
+    video {
+        pointer-events: none !important;
+    }
+    
+    /* Hide poster image once video starts */
+    video.playing {
+        background: transparent !important;
+    }
+    
+    video.playing[poster] {
+        background-image: none !important;
+        background: transparent !important;
+    }
 }
 
 /* Ensure videos are always visible when loaded */
@@ -393,9 +478,8 @@ video {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0;
+    opacity: 1;
     background: #000;
-    transition: opacity 0.5s ease;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     transform: translateZ(0);

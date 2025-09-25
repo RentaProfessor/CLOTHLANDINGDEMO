@@ -113,223 +113,186 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Enhanced video autoplay for mobile and iframe support
+// Aggressive mobile video autoplay - immediate start without play buttons
 document.addEventListener('DOMContentLoaded', function() {
     const videos = document.querySelectorAll('video');
-    let hasUserInteracted = false;
-    
-    // Detect if running in iframe
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isInIframe = window.self !== window.top;
+    
     if (isInIframe) {
         document.body.classList.add('in-iframe');
-        console.log('Running in iframe - applying iframe optimizations');
     }
-    
-    // Detect user interaction for mobile autoplay
-    const userInteractionEvents = ['touchstart', 'touchend', 'click', 'scroll'];
-    
-    function markUserInteraction() {
-        hasUserInteracted = true;
-        userInteractionEvents.forEach(event => {
-            document.removeEventListener(event, markUserInteraction);
-        });
-    }
-    
-    userInteractionEvents.forEach(event => {
-        document.addEventListener(event, markUserInteraction, { passive: true });
-    });
     
     videos.forEach((video, index) => {
-        // Set all required attributes for mobile autoplay
+        // Force all mobile-friendly attributes immediately
         video.muted = true;
         video.autoplay = true;
         video.loop = true;
         video.playsInline = true;
         video.controls = false;
-        video.preload = 'metadata';
+        video.preload = 'auto';
+        video.defaultMuted = true;
         
-        // Remove any controls attributes
+        // Remove all control attributes
         video.removeAttribute('controls');
-        video.setAttribute('webkit-playsinline', '');
-        video.setAttribute('x5-playsinline', '');
+        video.removeAttribute('poster');
         
-        // Mobile-specific attributes
-        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            video.setAttribute('playsinline', '');
-            video.setAttribute('webkit-playsinline', '');
-            video.setAttribute('x5-video-player-type', 'h5');
-            video.setAttribute('x5-video-player-fullscreen', 'false');
+        // Add mobile-specific attributes
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('x5-playsinline', 'true');
+        video.setAttribute('x5-video-player-type', 'h5');
+        video.setAttribute('x5-video-player-fullscreen', 'false');
+        video.setAttribute('x5-video-orientation', 'portraint');
+        
+        // iOS-specific policies
+        if (isMobile) {
+            video.setAttribute('playsinline', 'true');
+            video.setAttribute('webkit-playsinline', 'true');
+            video.style.webkitAppearance = 'none';
+            video.style.webkitTapHighlightColor = 'transparent';
         }
         
-        let playAttempts = 0;
-        const maxPlayAttempts = 5;
-        
-        function attemptPlay() {
-            if (playAttempts >= maxPlayAttempts) return;
-            playAttempts++;
-            
-            // Ensure video is properly configured
+        // Immediate play function
+        function forcePlay() {
             video.muted = true;
             video.controls = false;
             video.removeAttribute('controls');
+            video.removeAttribute('poster');
             
             const playPromise = video.play();
-            
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    console.log(`Video ${index + 1} autoplay successful`);
+                    console.log(`Video ${index + 1} playing successfully`);
                     video.style.opacity = '1';
-                    video.classList.add('loaded');
+                    video.classList.add('loaded', 'playing');
                     
-                    // Ensure video stays visible and playing
-                    setTimeout(() => {
-                        if (video.paused) {
-                            video.play().catch(() => {});
-                        }
-                    }, 500);
+                    // Remove poster after successful play
+                    video.removeAttribute('poster');
                     
-                }).catch(error => {
-                    console.log(`Video ${index + 1} autoplay failed:`, error.message);
-                    
-                    // For mobile devices, try again after user interaction
-                    if (!hasUserInteracted) {
-                        const playOnInteraction = () => {
-                            video.muted = true;
-                            video.controls = false;
-                            video.removeAttribute('controls');
-                            
-                            video.play().then(() => {
-                                video.style.opacity = '1';
-                                video.classList.add('loaded');
-                            }).catch(() => {
-                                // Last resort - show a very brief play button
-                                setTimeout(() => {
-                                    video.play().catch(() => {});
-                                }, 100);
-                            });
-                        };
-                        
-                        userInteractionEvents.forEach(event => {
-                            document.addEventListener(event, playOnInteraction, { once: true, passive: true });
-                        });
-                    } else {
-                        // Retry after a short delay
-                        setTimeout(() => attemptPlay(), 200);
-                    }
+                }).catch(() => {
+                    console.log(`Video ${index + 1} autoplay blocked - retrying...`);
+                    // Retry with user interaction
+                    setTimeout(() => forcePlay(), 100);
                 });
             }
         }
         
-        // Try to play when video is ready
-        function onVideoReady() {
-            if (video.readyState >= 2) {
-                attemptPlay();
-            }
-        }
+        // Multiple triggers for video start
+        video.addEventListener('loadeddata', forcePlay);
+        video.addEventListener('canplay', forcePlay);
+        video.addEventListener('loadedmetadata', forcePlay);
         
-        // Multiple event listeners to catch video readiness
-        video.addEventListener('loadeddata', onVideoReady);
-        video.addEventListener('canplay', onVideoReady);
-        video.addEventListener('loadedmetadata', onVideoReady);
+        // Immediate attempt
+        forcePlay();
         
-        // Start loading the video
-        video.load();
+        // Additional attempts with delays
+        setTimeout(() => forcePlay(), 50);
+        setTimeout(() => forcePlay(), 200);
+        setTimeout(() => forcePlay(), 500);
         
-        // Immediate play attempt for desktop/iframe scenarios
-        setTimeout(() => {
-            if (video.readyState >= 2) {
-                attemptPlay();
-            }
-        }, 100);
-        
-        // Video event handlers for debugging and maintenance
+        // Video maintenance
         video.addEventListener('playing', () => {
             video.style.opacity = '1';
             video.style.display = 'block';
-            video.classList.add('loaded');
+            video.classList.add('loaded', 'playing');
+            video.removeAttribute('poster');
+            video.removeAttribute('controls');
         });
         
         video.addEventListener('pause', () => {
-            // Auto-resume if paused unexpectedly
             if (!video.ended) {
-                setTimeout(() => {
-                    if (video.paused && !video.ended) {
-                        video.play().catch(() => {});
-                    }
-                }, 100);
+                setTimeout(() => video.play().catch(() => {}), 50);
             }
         });
         
-        video.addEventListener('stalled', () => {
-            setTimeout(() => {
-                if (video.networkState === 3) { // NETWORK_NO_SOURCE
-                    video.load();
-                }
-            }, 1000);
-        });
+        // Touch overlay handler for mobile
+        const touchOverlay = document.querySelector(`[data-video-trigger="${video.classList.contains('hero-video') ? 'hero' : 'showcase'}"]`);
+        if (touchOverlay && isMobile) {
+            touchOverlay.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                forcePlay();
+                touchOverlay.style.display = 'none';
+            }, { passive: false });
+            
+            touchOverlay.addEventListener('click', (e) => {
+                e.preventDefault();
+                forcePlay();
+                touchOverlay.style.display = 'none';
+            });
+        }
         
-        video.addEventListener('waiting', () => {
-            // Video is waiting for data, ensure it's still visible
-            video.style.opacity = '1';
-        });
-        
-        video.addEventListener('error', (e) => {
-            console.error(`Video ${index + 1} error:`, e);
-            // Try to reload after error
-            setTimeout(() => {
-                video.load();
-            }, 2000);
-        });
-        
-        // Continuous maintenance to prevent controls and black screen
-        setInterval(() => {
-            // Remove controls that might appear
+        // Continuous maintenance
+        const maintenance = setInterval(() => {
+            // Remove any controls that appear
             if (video.hasAttribute('controls') || video.controls) {
                 video.removeAttribute('controls');
                 video.controls = false;
             }
             
-            // Prevent black screen when video is playing
+            // Keep video visible when playing
             if (video.readyState >= 2 && !video.paused && !video.ended) {
                 video.style.opacity = '1';
                 video.style.display = 'block';
+                video.classList.add('playing');
+                video.removeAttribute('poster');
             }
-        }, 50);
+            
+            // Auto-restart if paused unexpectedly
+            if (video.paused && !video.ended && video.readyState >= 2) {
+                video.play().catch(() => {});
+            }
+        }, 100);
+        
+        // Clean up interval when video is removed
+        video.addEventListener('emptied', () => clearInterval(maintenance));
     });
     
-    // Handle orientation change and resize for mobile
-    function handleOrientationChange() {
-        setTimeout(() => {
+    // Global touch handler to start videos on any touch
+    if (isMobile) {
+        let hasStarted = false;
+        function startAllVideos() {
+            if (hasStarted) return;
+            hasStarted = true;
+            
             videos.forEach(video => {
-                video.style.objectFit = 'cover';
-                // Force a repaint to prevent black screen
-                video.style.transform = 'translateZ(0)';
-                setTimeout(() => {
-                    video.style.transform = '';
-                }, 50);
-                
-                // Ensure video is still playing after orientation change
-                if (video.paused && !video.ended) {
-                    video.play().catch(() => {});
-                }
+                video.muted = true;
+                video.removeAttribute('controls');
+                video.removeAttribute('poster');
+                video.play().then(() => {
+                    video.style.opacity = '1';
+                    video.classList.add('loaded', 'playing');
+                }).catch(() => {});
             });
-        }, 300);
+        }
+        
+        document.addEventListener('touchstart', startAllVideos, { once: true, passive: true });
+        document.addEventListener('click', startAllVideos, { once: true });
+        document.addEventListener('scroll', startAllVideos, { once: true, passive: true });
     }
     
-    window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange);
-    
-    // Handle visibility change (when iframe comes into/out of view)
+    // Handle visibility and orientation changes
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             setTimeout(() => {
                 videos.forEach(video => {
                     if (video.paused && !video.ended) {
+                        video.muted = true;
+                        video.removeAttribute('controls');
                         video.play().catch(() => {});
                     }
                 });
-            }, 500);
+            }, 200);
         }
+    });
+    
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            videos.forEach(video => {
+                if (video.paused && !video.ended) {
+                    video.play().catch(() => {});
+                }
+            });
+        }, 300);
     });
 });
 
