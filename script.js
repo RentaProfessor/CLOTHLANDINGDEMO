@@ -113,152 +113,31 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Enhanced video loading and autoplay for all devices
+// Simple video autoplay
 document.addEventListener('DOMContentLoaded', function() {
     const videos = document.querySelectorAll('video');
     
-    console.log('Found', videos.length, 'videos to load');
-    
-    videos.forEach((video, index) => {
-        console.log(`Video ${index + 1}:`, video.currentSrc || video.src || 'No src');
-        
-        // Aggressively remove any controls and set attributes
-        video.removeAttribute('controls');
-        video.controls = false;
-        video.setAttribute('preload', 'auto');
-        video.setAttribute('webkit-playsinline', 'true');
-        video.setAttribute('playsinline', 'true');
-        video.setAttribute('muted', 'true');
-        video.muted = true; // Ensure muted property is set
+    videos.forEach(video => {
+        // Simple setup
+        video.muted = true;
         video.autoplay = true;
         video.loop = true;
         video.playsInline = true;
         
-        // Force remove controls on mobile
-        const removeControls = () => {
-            video.removeAttribute('controls');
-            video.controls = false;
-        };
-        
-        // Remove controls repeatedly to fight mobile browsers
-        removeControls();
-        setTimeout(removeControls, 100);
-        setTimeout(removeControls, 500);
-        setTimeout(removeControls, 1000);
-        
-        // Multiple event listeners for reliable autoplay
-        const attemptPlay = () => {
-            // Remove controls again before playing
-            video.removeAttribute('controls');
-            video.controls = false;
-            
-            if (video.readyState >= 1) { // HAVE_METADATA or better
-                video.play().then(() => {
-                    console.log('Video autoplay successful:', video.currentSrc);
-                    video.classList.add('loaded');
-                }).catch(e => {
-                    console.log('Autoplay failed:', e);
-                    
-                    // For mobile, try immediately on any interaction
-                    const playOnInteraction = (event) => {
-                        console.log('User interaction detected, attempting play:', event.type);
-                        video.removeAttribute('controls');
-                        video.controls = false;
-                        
-                        video.play().then(() => {
-                            console.log('Manual play successful');
-                            video.classList.add('loaded');
-                        }).catch(err => {
-                            console.log('Manual play failed:', err);
-                            // Try one more time after a short delay
-                            setTimeout(() => {
-                                video.play().catch(e2 => console.log('Final play attempt failed:', e2));
-                            }, 200);
-                        });
-                        
-                        // Remove all listeners after first success
-                        document.removeEventListener('click', playOnInteraction);
-                        document.removeEventListener('touchstart', playOnInteraction);
-                        document.removeEventListener('touchend', playOnInteraction);
-                        document.removeEventListener('scroll', playOnInteraction);
-                        document.removeEventListener('mousemove', playOnInteraction);
-                    };
-                    
-                    // Add multiple interaction listeners
-                    document.addEventListener('click', playOnInteraction, { passive: true });
-                    document.addEventListener('touchstart', playOnInteraction, { passive: true });
-                    document.addEventListener('touchend', playOnInteraction, { passive: true });
-                    document.addEventListener('scroll', playOnInteraction, { passive: true });
-                    document.addEventListener('mousemove', playOnInteraction, { passive: true, once: true });
-                });
-            }
-        };
-        
-        // Try to play when video data is loaded
+        // Try to play when loaded
         video.addEventListener('loadeddata', function() {
-            console.log('Video data loaded:', this.currentSrc);
             this.classList.add('loaded');
-            attemptPlay();
-        });
-        
-        // Also try when enough data is available
-        video.addEventListener('canplay', function() {
-            console.log('Video can play:', this.currentSrc);
-            if (this.paused) {
-                attemptPlay();
-            }
-        });
-        
-        // Try when metadata is loaded
-        video.addEventListener('loadedmetadata', function() {
-            console.log('Video metadata loaded:', this.currentSrc);
-            if (this.paused && this.readyState >= 1) {
-                attemptPlay();
-            }
-        });
-        
-        // Handle video load errors
-        video.addEventListener('error', function() {
-            console.error('Video failed to load:', this.currentSrc || this.src);
-        });
-        
-        // Log when video starts playing
-        video.addEventListener('play', function() {
-            console.log('Video started playing:', this.currentSrc);
-        });
-        
-        // Force load the video
-        video.load();
-        
-        // Fallback: try to play after a delay
-        setTimeout(() => {
-            if (video.paused && video.readyState >= 1) {
-                attemptPlay();
-            }
-        }, 1000);
-        
-        // Continuously monitor and remove controls (for stubborn mobile browsers)
-        const controlsObserver = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'controls') {
-                    video.removeAttribute('controls');
-                    video.controls = false;
-                }
+            this.play().catch(() => {
+                // If autoplay fails, play on user interaction
+                const playOnTouch = () => {
+                    this.play();
+                    document.removeEventListener('touchstart', playOnTouch);
+                    document.removeEventListener('click', playOnTouch);
+                };
+                document.addEventListener('touchstart', playOnTouch, { once: true });
+                document.addEventListener('click', playOnTouch, { once: true });
             });
         });
-        
-        controlsObserver.observe(video, {
-            attributes: true,
-            attributeFilter: ['controls']
-        });
-        
-        // Also remove controls periodically
-        setInterval(() => {
-            if (video.controls || video.hasAttribute('controls')) {
-                video.removeAttribute('controls');
-                video.controls = false;
-            }
-        }, 500);
     });
     
     // Handle orientation change on mobile
