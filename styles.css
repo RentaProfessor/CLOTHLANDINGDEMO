@@ -139,23 +139,55 @@ body {
     opacity: 0;
     background: #000;
     min-height: 100vh;
+    transition: opacity 0.5s ease;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
-/* Simple video control hiding */
+/* Comprehensive video control hiding for all browsers */
 video::-webkit-media-controls {
     display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
 
 video::-webkit-media-controls-start-playback-button {
     display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+video::-webkit-media-controls-play-button {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+video::-webkit-media-controls-overlay-play-button {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+video::-webkit-media-controls-panel {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
 
 video {
     outline: none;
+    pointer-events: none;
 }
 
-.hero-video.loaded {
-    opacity: 1;
+/* Ensure videos are always visible when loaded */
+.hero-video.loaded,
+.showcase-video.loaded {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
 }
 
 /* Desktop video optimization */
@@ -363,10 +395,12 @@ video {
     object-fit: cover;
     opacity: 0;
     background: #000;
-}
-
-.showcase-video.loaded {
-    opacity: 1;
+    transition: opacity 0.5s ease;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    pointer-events: none;
 }
 
 
@@ -623,12 +657,44 @@ video {
     will-change: opacity;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 .collection-item {
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+}
+
+/* Iframe-specific optimizations */
+body.in-iframe {
+    overflow-x: hidden;
+}
+
+body.in-iframe .hero-video,
+body.in-iframe .showcase-video {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    will-change: opacity, transform;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .hero-video,
+    .showcase-video {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+    }
+    
+    .hero-video-container {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
 }
 
 /* Mobile Menu */
@@ -692,15 +758,34 @@ video {
     }
     
     .hero-video-container {
-        transform: scale(1.1);
+        transform: scale(1.05);
+        overflow: hidden;
+    }
+    
+    .hero-video,
+    .showcase-video {
+        object-position: center center;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        will-change: auto;
+        min-width: 100%;
+        min-height: 100%;
     }
     
     .video-item {
         height: 300px;
+        overflow: hidden;
     }
     
+    /* Force hardware acceleration on mobile */
+    .hero-video,
     .showcase-video {
-        object-position: center center;
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000;
+        perspective: 1000;
     }
 }
 
