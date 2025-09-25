@@ -120,23 +120,64 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Found', videos.length, 'videos to load');
     
     videos.forEach((video, index) => {
-        console.log(`Video ${index + 1}:`, video.src || 'No direct src');
+        console.log(`Video ${index + 1}:`, video.currentSrc || video.src || 'No src');
         
-        // Add loading class when video data is loaded
+        // Set video attributes immediately
+        video.setAttribute('preload', 'auto');
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('muted', 'true');
+        video.muted = true; // Ensure muted property is set
+        video.autoplay = true;
+        video.loop = true;
+        
+        // Multiple event listeners for reliable autoplay
+        const attemptPlay = () => {
+            if (video.readyState >= 3) { // HAVE_FUTURE_DATA
+                video.play().then(() => {
+                    console.log('Video autoplay successful:', video.currentSrc);
+                    video.classList.add('loaded');
+                }).catch(e => {
+                    console.log('Autoplay failed:', e);
+                    // Try again with user interaction
+                    const playOnInteraction = () => {
+                        video.play().then(() => {
+                            console.log('Manual play successful');
+                        }).catch(err => console.log('Manual play failed:', err));
+                        
+                        document.removeEventListener('click', playOnInteraction);
+                        document.removeEventListener('touchstart', playOnInteraction);
+                        document.removeEventListener('scroll', playOnInteraction);
+                    };
+                    
+                    document.addEventListener('click', playOnInteraction, { once: true });
+                    document.addEventListener('touchstart', playOnInteraction, { once: true });
+                    document.addEventListener('scroll', playOnInteraction, { once: true });
+                });
+            }
+        };
+        
+        // Try to play when video data is loaded
         video.addEventListener('loadeddata', function() {
-            console.log('Video loaded successfully:', this.currentSrc);
+            console.log('Video data loaded:', this.currentSrc);
             this.classList.add('loaded');
-            
-            // Force autoplay on all devices
-            this.play().then(() => {
-                console.log('Autoplay successful:', this.currentSrc);
-            }).catch(e => {
-                console.log('Autoplay failed, retrying:', e);
-                // Retry autoplay after a short delay
-                setTimeout(() => {
-                    this.play().catch(err => console.log('Second autoplay attempt failed:', err));
-                }, 500);
-            });
+            attemptPlay();
+        });
+        
+        // Also try when enough data is available
+        video.addEventListener('canplay', function() {
+            console.log('Video can play:', this.currentSrc);
+            if (this.paused) {
+                attemptPlay();
+            }
+        });
+        
+        // Try when metadata is loaded
+        video.addEventListener('loadedmetadata', function() {
+            console.log('Video metadata loaded:', this.currentSrc);
+            if (this.paused && this.readyState >= 1) {
+                attemptPlay();
+            }
         });
         
         // Handle video load errors
@@ -149,22 +190,15 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Video started playing:', this.currentSrc);
         });
         
-        // Log loading states
-        video.addEventListener('loadstart', function() {
-            console.log('Video load started:', this.currentSrc);
-        });
+        // Force load the video
+        video.load();
         
-        video.addEventListener('canplay', function() {
-            console.log('Video can play:', this.currentSrc);
-        });
-        
-        // Set preload for better performance
-        video.setAttribute('preload', 'auto');
-        
-        // Ensure proper mobile attributes
-        video.setAttribute('webkit-playsinline', 'true');
-        video.setAttribute('playsinline', 'true');
-        video.setAttribute('muted', 'true');
+        // Fallback: try to play after a delay
+        setTimeout(() => {
+            if (video.paused && video.readyState >= 1) {
+                attemptPlay();
+            }
+        }, 1000);
     });
     
     // Handle orientation change on mobile
