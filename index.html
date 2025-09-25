@@ -10,6 +10,9 @@
     <meta name="allow" content="autoplay; fullscreen; picture-in-picture">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
     <title>CLOTH - Premium Streetwear</title>
     <link rel="stylesheet" href="styles.css?v=1.7">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -40,20 +43,29 @@
     <section id="home" class="hero">
         <div class="hero-video-container">
              <video 
-                 autoplay 
-                 muted 
-                 loop 
-                 playsinline 
-                 webkit-playsinline 
-                 x5-playsinline
+                 id="hero-video"
+                 autoplay="autoplay"
+                 muted="muted"
+                 defaultmuted="defaultmuted"
+                 loop="loop"
+                 playsinline="playsinline"
+                 webkit-playsinline="webkit-playsinline"
+                 x5-playsinline="x5-playsinline"
+                 x5-video-player-type="h5"
+                 x5-video-player-fullscreen="false"
+                 x5-video-orientation="portraint"
                  preload="auto"
                  class="hero-video"
                  allow="autoplay; fullscreen"
-                 data-mobile-optimized="true">
+                 data-setup='{"fluid": true}'
+                 data-mobile-optimized="true"
+                 webkit-airplay="allow"
+                 controlslist="nodownload nofullscreen noremoteplayback"
+                 disablepictureinpicture>
                  <source src="Videos/5911887-hq.mp4?v=1.7" type="video/mp4">
                  Your browser does not support the video tag.
              </video>
-             <div class="video-touch-overlay" data-video-trigger="hero"></div>
+             <canvas id="hero-canvas" class="video-canvas" style="display:none;"></canvas>
             <div class="hero-overlay"></div>
         </div>
         <div class="hero-content">
@@ -122,20 +134,29 @@
         <div class="video-grid">
             <div class="video-item">
                  <video 
-                     autoplay 
-                     muted 
-                     loop 
-                     playsinline 
-                     webkit-playsinline 
-                     x5-playsinline
+                     id="showcase-video"
+                     autoplay="autoplay"
+                     muted="muted"
+                     defaultmuted="defaultmuted"
+                     loop="loop"
+                     playsinline="playsinline"
+                     webkit-playsinline="webkit-playsinline"
+                     x5-playsinline="x5-playsinline"
+                     x5-video-player-type="h5"
+                     x5-video-player-fullscreen="false"
+                     x5-video-orientation="portraint"
                      preload="auto"
                      class="showcase-video"
                      allow="autoplay; fullscreen"
-                     data-mobile-optimized="true">
+                     data-setup='{"fluid": true}'
+                     data-mobile-optimized="true"
+                     webkit-airplay="allow"
+                     controlslist="nodownload nofullscreen noremoteplayback"
+                     disablepictureinpicture>
                      <source src="Videos/8733251-compressed-25mb.mp4?v=1.7" type="video/mp4">
                      Your browser does not support the video tag.
                  </video>
-                 <div class="video-touch-overlay" data-video-trigger="showcase"></div>
+                 <canvas id="showcase-canvas" class="video-canvas" style="display:none;"></canvas>
                 <div class="video-overlay">
                     <h3>Street Culture</h3>
                     <p>Embrace the urban lifestyle</p>

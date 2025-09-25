@@ -113,187 +113,268 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Aggressive mobile video autoplay - immediate start without play buttons
+// Ultra-aggressive mobile video autoplay with canvas fallback
 document.addEventListener('DOMContentLoaded', function() {
-    const videos = document.querySelectorAll('video');
     const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isInIframe = window.self !== window.top;
     
     if (isInIframe) {
         document.body.classList.add('in-iframe');
     }
     
-    videos.forEach((video, index) => {
-        // Force all mobile-friendly attributes immediately
+    // Aggressive video setup for each video
+    function setupVideo(videoId, canvasId) {
+        const video = document.getElementById(videoId);
+        const canvas = document.getElementById(canvasId);
+        
+        if (!video) return;
+        
+        // Set ultra-aggressive attributes
         video.muted = true;
+        video.defaultMuted = true;
         video.autoplay = true;
         video.loop = true;
         video.playsInline = true;
         video.controls = false;
         video.preload = 'auto';
-        video.defaultMuted = true;
         
-        // Remove all control attributes
+        // Remove any blocking attributes
         video.removeAttribute('controls');
         video.removeAttribute('poster');
         
-        // Add mobile-specific attributes
-        video.setAttribute('webkit-playsinline', 'true');
-        video.setAttribute('x5-playsinline', 'true');
-        video.setAttribute('x5-video-player-type', 'h5');
-        video.setAttribute('x5-video-player-fullscreen', 'false');
-        video.setAttribute('x5-video-orientation', 'portraint');
-        
-        // iOS-specific policies
-        if (isMobile) {
-            video.setAttribute('playsinline', 'true');
+        // Force iOS-specific attributes
+        if (isiOS) {
             video.setAttribute('webkit-playsinline', 'true');
+            video.setAttribute('playsinline', 'true');
             video.style.webkitAppearance = 'none';
+            video.style.webkitUserSelect = 'none';
+            video.style.webkitTouchCallout = 'none';
             video.style.webkitTapHighlightColor = 'transparent';
         }
         
-        // Immediate play function
-        function forcePlay() {
+        // Canvas fallback function
+        function useCanvasFallback() {
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth || 1920;
+            canvas.height = video.videoHeight || 1080;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.objectFit = 'cover';
+            
+            function drawFrame() {
+                if (video.readyState >= 2) {
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                }
+                requestAnimationFrame(drawFrame);
+            }
+            
+            video.addEventListener('loadeddata', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                drawFrame();
+                
+                // Show canvas instead of video
+                canvas.style.display = 'block';
+                video.style.display = 'none';
+            });
+        }
+        
+        // Ultra-aggressive play function
+        let playAttempts = 0;
+        function ultraPlay() {
+            playAttempts++;
+            
+            // Force muted state
             video.muted = true;
+            video.volume = 0;
             video.controls = false;
             video.removeAttribute('controls');
-            video.removeAttribute('poster');
             
+            // Immediate play attempt
             const playPromise = video.play();
+            
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    console.log(`Video ${index + 1} playing successfully`);
+                    console.log(`${videoId} autoplay SUCCESS on attempt ${playAttempts}`);
                     video.style.opacity = '1';
-                    video.classList.add('loaded', 'playing');
+                    video.style.display = 'block';
+                    video.classList.add('playing');
                     
-                    // Remove poster after successful play
-                    video.removeAttribute('poster');
+                    // Ensure it keeps playing
+                    setTimeout(() => {
+                        if (video.paused) video.play().catch(() => {});
+                    }, 100);
                     
-                }).catch(() => {
-                    console.log(`Video ${index + 1} autoplay blocked - retrying...`);
-                    // Retry with user interaction
-                    setTimeout(() => forcePlay(), 100);
+                }).catch((error) => {
+                    console.log(`${videoId} autoplay FAILED on attempt ${playAttempts}:`, error.name);
+                    
+                    // Try canvas fallback for iOS
+                    if (isiOS && playAttempts < 3) {
+                        setTimeout(() => {
+                            video.load();
+                            ultraPlay();
+                        }, 100);
+                    } else if (playAttempts < 5) {
+                        setTimeout(ultraPlay, 200);
+                    } else {
+                        console.log(`${videoId} switching to canvas fallback`);
+                        useCanvasFallback();
+                    }
                 });
             }
         }
         
-        // Multiple triggers for video start
-        video.addEventListener('loadeddata', forcePlay);
-        video.addEventListener('canplay', forcePlay);
-        video.addEventListener('loadedmetadata', forcePlay);
+        // Multiple event triggers
+        video.addEventListener('loadstart', ultraPlay);
+        video.addEventListener('loadedmetadata', ultraPlay);
+        video.addEventListener('loadeddata', ultraPlay);
+        video.addEventListener('canplay', ultraPlay);
+        video.addEventListener('canplaythrough', ultraPlay);
         
-        // Immediate attempt
-        forcePlay();
+        // Force load and immediate play
+        video.load();
+        ultraPlay();
         
-        // Additional attempts with delays
-        setTimeout(() => forcePlay(), 50);
-        setTimeout(() => forcePlay(), 200);
-        setTimeout(() => forcePlay(), 500);
+        // Staggered attempts
+        setTimeout(ultraPlay, 10);
+        setTimeout(ultraPlay, 50);
+        setTimeout(ultraPlay, 150);
+        setTimeout(ultraPlay, 300);
+        setTimeout(ultraPlay, 500);
+        setTimeout(ultraPlay, 1000);
         
-        // Video maintenance
+        // Event handlers
         video.addEventListener('playing', () => {
             video.style.opacity = '1';
             video.style.display = 'block';
-            video.classList.add('loaded', 'playing');
-            video.removeAttribute('poster');
-            video.removeAttribute('controls');
+            video.classList.add('playing');
+            console.log(`${videoId} is now playing`);
         });
         
         video.addEventListener('pause', () => {
+            console.log(`${videoId} paused - restarting`);
             if (!video.ended) {
-                setTimeout(() => video.play().catch(() => {}), 50);
+                setTimeout(() => video.play().catch(() => {}), 25);
             }
         });
         
-        // Touch overlay handler for mobile
-        const touchOverlay = document.querySelector(`[data-video-trigger="${video.classList.contains('hero-video') ? 'hero' : 'showcase'}"]`);
-        if (touchOverlay && isMobile) {
-            touchOverlay.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                forcePlay();
-                touchOverlay.style.display = 'none';
-            }, { passive: false });
-            
-            touchOverlay.addEventListener('click', (e) => {
-                e.preventDefault();
-                forcePlay();
-                touchOverlay.style.display = 'none';
-            });
-        }
+        video.addEventListener('waiting', () => {
+            console.log(`${videoId} waiting - forcing play`);
+            video.play().catch(() => {});
+        });
         
-        // Continuous maintenance
+        video.addEventListener('stalled', () => {
+            console.log(`${videoId} stalled - reloading`);
+            video.load();
+            setTimeout(ultraPlay, 100);
+        });
+        
+        // Continuous maintenance with shorter interval
         const maintenance = setInterval(() => {
-            // Remove any controls that appear
+            // Remove controls
             if (video.hasAttribute('controls') || video.controls) {
                 video.removeAttribute('controls');
                 video.controls = false;
             }
             
-            // Keep video visible when playing
-            if (video.readyState >= 2 && !video.paused && !video.ended) {
-                video.style.opacity = '1';
-                video.style.display = 'block';
-                video.classList.add('playing');
-                video.removeAttribute('poster');
+            // Force muted
+            if (!video.muted || video.volume > 0) {
+                video.muted = true;
+                video.volume = 0;
             }
             
-            // Auto-restart if paused unexpectedly
+            // Auto-restart
             if (video.paused && !video.ended && video.readyState >= 2) {
                 video.play().catch(() => {});
             }
-        }, 100);
-        
-        // Clean up interval when video is removed
-        video.addEventListener('emptied', () => clearInterval(maintenance));
-    });
-    
-    // Global touch handler to start videos on any touch
-    if (isMobile) {
-        let hasStarted = false;
-        function startAllVideos() {
-            if (hasStarted) return;
-            hasStarted = true;
             
-            videos.forEach(video => {
-                video.muted = true;
-                video.removeAttribute('controls');
-                video.removeAttribute('poster');
-                video.play().then(() => {
-                    video.style.opacity = '1';
-                    video.classList.add('loaded', 'playing');
-                }).catch(() => {});
-            });
-        }
+            // Ensure visibility
+            if (!video.paused && video.readyState >= 2) {
+                video.style.opacity = '1';
+                video.style.display = 'block';
+            }
+        }, 50);
         
-        document.addEventListener('touchstart', startAllVideos, { once: true, passive: true });
-        document.addEventListener('click', startAllVideos, { once: true });
-        document.addEventListener('scroll', startAllVideos, { once: true, passive: true });
+        // Cleanup
+        video.addEventListener('emptied', () => clearInterval(maintenance));
     }
     
-    // Handle visibility and orientation changes
+    // Setup both videos
+    setupVideo('hero-video', 'hero-canvas');
+    setupVideo('showcase-video', 'showcase-canvas');
+    
+    // Global fallback handlers
+    let interactionTriggered = false;
+    
+    function triggerAllVideos() {
+        if (interactionTriggered) return;
+        interactionTriggered = true;
+        
+        const videos = ['hero-video', 'showcase-video'];
+        videos.forEach(id => {
+            const video = document.getElementById(id);
+            if (video) {
+                video.muted = true;
+                video.volume = 0;
+                video.removeAttribute('controls');
+                video.play().then(() => {
+                    video.style.opacity = '1';
+                    video.classList.add('playing');
+                }).catch(() => console.log(`${id} fallback failed`));
+            }
+        });
+    }
+    
+    // Immediate triggers
+    if (isMobile || isiOS) {
+        ['touchstart', 'touchmove', 'click', 'scroll', 'keydown'].forEach(event => {
+            document.addEventListener(event, triggerAllVideos, { 
+                once: true, 
+                passive: true,
+                capture: true 
+            });
+        });
+    }
+    
+    // Page visibility handling
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             setTimeout(() => {
-                videos.forEach(video => {
-                    if (video.paused && !video.ended) {
+                ['hero-video', 'showcase-video'].forEach(id => {
+                    const video = document.getElementById(id);
+                    if (video && video.paused && !video.ended) {
                         video.muted = true;
-                        video.removeAttribute('controls');
                         video.play().catch(() => {});
                     }
                 });
-            }, 200);
+            }, 100);
         }
     });
     
+    // Orientation change handling
     window.addEventListener('orientationchange', () => {
         setTimeout(() => {
-            videos.forEach(video => {
-                if (video.paused && !video.ended) {
-                    video.play().catch(() => {});
+            ['hero-video', 'showcase-video'].forEach(id => {
+                const video = document.getElementById(id);
+                if (video) {
+                    video.style.objectFit = 'cover';
+                    if (video.paused && !video.ended) {
+                        video.play().catch(() => {});
+                    }
                 }
             });
-        }, 300);
+        }, 200);
     });
+    
+    // Force immediate execution on iOS
+    if (isiOS) {
+        setTimeout(() => {
+            document.dispatchEvent(new Event('touchstart'));
+        }, 500);
+    }
 });
 
 // Add hover effects for collection items
