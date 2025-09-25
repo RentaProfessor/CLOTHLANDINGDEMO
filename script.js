@@ -113,31 +113,52 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Simple video autoplay
+// Simple video autoplay with iframe support
 document.addEventListener('DOMContentLoaded', function() {
     const videos = document.querySelectorAll('video');
     
     videos.forEach(video => {
+        // Remove controls attribute completely
+        video.removeAttribute('controls');
+        video.controls = false;
+        
         // Simple setup
         video.muted = true;
         video.autoplay = true;
         video.loop = true;
         video.playsInline = true;
         
-        // Try to play when loaded
-        video.addEventListener('loadeddata', function() {
-            this.classList.add('loaded');
-            this.play().catch(() => {
+        // Force play immediately when ready
+        const playVideo = () => {
+            video.removeAttribute('controls');
+            video.controls = false;
+            video.play().then(() => {
+                video.classList.add('loaded');
+            }).catch(() => {
                 // If autoplay fails, play on user interaction
                 const playOnTouch = () => {
-                    this.play();
+                    video.removeAttribute('controls');
+                    video.controls = false;
+                    video.play();
                     document.removeEventListener('touchstart', playOnTouch);
                     document.removeEventListener('click', playOnTouch);
                 };
                 document.addEventListener('touchstart', playOnTouch, { once: true });
                 document.addEventListener('click', playOnTouch, { once: true });
             });
-        });
+        };
+        
+        // Try multiple events for reliable playback
+        video.addEventListener('loadeddata', playVideo);
+        video.addEventListener('canplay', playVideo);
+        
+        // Keep removing controls
+        setInterval(() => {
+            if (video.hasAttribute('controls') || video.controls) {
+                video.removeAttribute('controls');
+                video.controls = false;
+            }
+        }, 100);
     });
     
     // Handle orientation change on mobile
