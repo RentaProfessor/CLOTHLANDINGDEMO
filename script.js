@@ -113,37 +113,30 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Enhanced video loading and mobile optimization
+// Enhanced video loading and autoplay for all devices
 document.addEventListener('DOMContentLoaded', function() {
     const videos = document.querySelectorAll('video');
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    console.log('Found', videos.length, 'videos to load. Mobile device:', isMobile);
+    console.log('Found', videos.length, 'videos to load');
     
     videos.forEach((video, index) => {
         console.log(`Video ${index + 1}:`, video.src || 'No direct src');
-        
-        // Get corresponding play overlay
-        const playOverlay = video.parentElement.querySelector('.video-play-overlay');
         
         // Add loading class when video data is loaded
         video.addEventListener('loadeddata', function() {
             console.log('Video loaded successfully:', this.currentSrc);
             this.classList.add('loaded');
             
-            // Try autoplay for desktop or if not mobile
-            if (!isMobile) {
-                this.play().then(() => {
-                    console.log('Desktop autoplay successful');
-                    if (playOverlay) playOverlay.classList.add('hidden');
-                }).catch(e => {
-                    console.log('Desktop autoplay failed, showing play button:', e);
-                    if (playOverlay) playOverlay.classList.remove('hidden');
-                });
-            } else {
-                // Mobile: show play button immediately
-                if (playOverlay) playOverlay.classList.remove('hidden');
-            }
+            // Force autoplay on all devices
+            this.play().then(() => {
+                console.log('Autoplay successful:', this.currentSrc);
+            }).catch(e => {
+                console.log('Autoplay failed, retrying:', e);
+                // Retry autoplay after a short delay
+                setTimeout(() => {
+                    this.play().catch(err => console.log('Second autoplay attempt failed:', err));
+                }, 500);
+            });
         });
         
         // Handle video load errors
@@ -154,14 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Log when video starts playing
         video.addEventListener('play', function() {
             console.log('Video started playing:', this.currentSrc);
-            if (playOverlay) playOverlay.classList.add('hidden');
-        });
-        
-        // Show play button when video pauses
-        video.addEventListener('pause', function() {
-            if (playOverlay && !this.ended) {
-                playOverlay.classList.remove('hidden');
-            }
         });
         
         // Log loading states
@@ -173,70 +158,13 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Video can play:', this.currentSrc);
         });
         
-        // Mobile-specific optimizations
-        if (isMobile) {
-            // Reduce video quality for mobile
-            video.setAttribute('preload', 'metadata');
-            
-            // Pause videos when not in viewport on mobile to save data
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.play();
-                    } else {
-                        entry.target.pause();
-                    }
-                });
-            }, { threshold: 0.25 });
-            
-            observer.observe(video);
-        } else {
-            // Desktop optimization
-            video.setAttribute('preload', 'auto');
-        }
+        // Set preload for better performance
+        video.setAttribute('preload', 'auto');
         
-        // Enhanced mobile autoplay handling
-        video.addEventListener('canplay', function() {
-            if (this.paused) {
-                this.play().catch(e => {
-                    console.log('Video autoplay prevented:', e);
-                    // Add click handler for mobile autoplay fallback
-                    const playOnInteraction = () => {
-                        this.play().catch(err => console.log('Manual play failed:', err));
-                        document.removeEventListener('touchstart', playOnInteraction);
-                        document.removeEventListener('click', playOnInteraction);
-                    };
-                    document.addEventListener('touchstart', playOnInteraction, { once: true });
-                    document.addEventListener('click', playOnInteraction, { once: true });
-                });
-            }
-        });
-        
-        // Force autoplay on mobile with additional attributes
+        // Ensure proper mobile attributes
         video.setAttribute('webkit-playsinline', 'true');
         video.setAttribute('playsinline', 'true');
         video.setAttribute('muted', 'true');
-        
-        // Try to play immediately when loaded
-        video.addEventListener('loadeddata', function() {
-            console.log('Video data loaded, attempting autoplay');
-            this.play().catch(e => {
-                console.log('Autoplay failed, will retry on user interaction:', e);
-            });
-        });
-        
-        // Add click handler for play overlay
-        if (playOverlay) {
-            playOverlay.addEventListener('click', function() {
-                console.log('Play button clicked');
-                video.play().then(() => {
-                    console.log('Manual play successful');
-                    playOverlay.classList.add('hidden');
-                }).catch(e => {
-                    console.error('Manual play failed:', e);
-                });
-            });
-        }
     });
     
     // Handle orientation change on mobile
