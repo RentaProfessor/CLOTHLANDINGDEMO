@@ -142,9 +142,10 @@ body {
     min-height: 100vh;
 }
 
-/* Hide native video controls completely */
+/* Hide native video controls completely - all browsers */
 video::-webkit-media-controls {
     display: none !important;
+    -webkit-appearance: none;
 }
 
 video::-webkit-media-controls-panel {
@@ -159,8 +160,76 @@ video::-webkit-media-controls-start-playback-button {
     display: none !important;
 }
 
+video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+video::-webkit-media-controls-timeline {
+    display: none !important;
+}
+
+video::-webkit-media-controls-current-time-display {
+    display: none !important;
+}
+
+video::-webkit-media-controls-time-remaining-display {
+    display: none !important;
+}
+
+video::-webkit-media-controls-seek-back-button {
+    display: none !important;
+}
+
+video::-webkit-media-controls-seek-forward-button {
+    display: none !important;
+}
+
+video::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+}
+
+video::-webkit-media-controls-rewind-button {
+    display: none !important;
+}
+
+video::-webkit-media-controls-return-to-realtime-button {
+    display: none !important;
+}
+
+video::-webkit-media-controls-toggle-closed-captions-button {
+    display: none !important;
+}
+
+video::-webkit-media-controls-volume-slider {
+    display: none !important;
+}
+
 video {
     outline: none;
+    -webkit-appearance: none;
+    background: transparent;
+}
+
+/* Force no controls on all videos */
+video[controls] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Mobile specific control hiding */
+@media (max-width: 768px) {
+    video {
+        pointer-events: auto;
+        -webkit-appearance: none;
+        -webkit-playsinline: true;
+    }
+    
+    video::-webkit-media-controls {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
 }
 
 .hero-video.loaded {
