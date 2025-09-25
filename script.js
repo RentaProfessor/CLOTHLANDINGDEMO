@@ -193,6 +193,14 @@ document.addEventListener('DOMContentLoaded', function() {
             video.controls = false;
             video.removeAttribute('controls');
             
+            // Force seek to ensure video isn't stuck on first frame
+            if (video.readyState >= 2) {
+                video.currentTime = 0.1;
+                setTimeout(() => {
+                    video.currentTime = 0;
+                }, 50);
+            }
+            
             // Immediate play attempt
             const playPromise = video.play();
             
@@ -203,10 +211,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     video.style.display = 'block';
                     video.classList.add('playing');
                     
-                    // Ensure it keeps playing
+                    // Ensure it keeps playing and isn't stuck
                     setTimeout(() => {
-                        if (video.paused) video.play().catch(() => {});
+                        if (video.paused || video.currentTime === 0) {
+                            video.currentTime = 0.1;
+                            video.play().catch(() => {});
+                        }
                     }, 100);
+                    
+                    // Additional check for stuck video
+                    setTimeout(() => {
+                        if (video.currentTime === 0 && !video.paused) {
+                            video.currentTime = 0.1;
+                        }
+                    }, 500);
                     
                 }).catch((error) => {
                     console.log(`${videoId} autoplay FAILED on attempt ${playAttempts}:`, error.name);
@@ -273,6 +291,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Continuous maintenance with shorter interval
+        let lastCurrentTime = 0;
+        let stuckCount = 0;
+        
         const maintenance = setInterval(() => {
             // Remove controls
             if (video.hasAttribute('controls') || video.controls) {
@@ -288,7 +309,24 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Auto-restart
             if (video.paused && !video.ended && video.readyState >= 2) {
+                video.currentTime = 0.1;
                 video.play().catch(() => {});
+            }
+            
+            // Check for stuck video (currentTime not progressing)
+            if (!video.paused && video.readyState >= 2) {
+                if (video.currentTime === lastCurrentTime && video.currentTime === 0) {
+                    stuckCount++;
+                    if (stuckCount > 5) {
+                        console.log(`${videoId} appears stuck - forcing seek and play`);
+                        video.currentTime = 0.1;
+                        video.play().catch(() => {});
+                        stuckCount = 0;
+                    }
+                } else {
+                    stuckCount = 0;
+                }
+                lastCurrentTime = video.currentTime;
             }
             
             // Ensure visibility
@@ -296,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 video.style.opacity = '1';
                 video.style.display = 'block';
             }
-        }, 50);
+        }, 100);
         
         // Cleanup
         video.addEventListener('emptied', () => clearInterval(maintenance));
@@ -369,11 +407,80 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 200);
     });
     
+    // Immediate video play trigger for mobile
+    function forceVideoPlayback() {
+        ['hero-video', 'showcase-video'].forEach(id => {
+            const video = document.getElementById(id);
+            if (video) {
+                video.muted = true;
+                video.volume = 0;
+                video.currentTime = 0.1; // Force seek to trigger play
+                
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log(`${id} forced play SUCCESS`);
+                        video.style.opacity = '1';
+                        video.classList.add('playing');
+                    }).catch(() => {
+                        console.log(`${id} forced play FAILED`);
+                        // Try seeking and playing again
+                        setTimeout(() => {
+                            video.currentTime = 0;
+                            video.play().catch(() => {});
+                        }, 100);
+                    });
+                }
+            }
+        });
+    }
+    
+    // Immediate triggers on page load
+    setTimeout(forceVideoPlayback, 100);
+    setTimeout(forceVideoPlayback, 500);
+    setTimeout(forceVideoPlayback, 1000);
+    
+    // Add invisible click catcher that covers the entire screen
+    const clickCatcher = document.createElement('div');
+    clickCatcher.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: transparent;
+        pointer-events: auto;
+    `;
+    
+    clickCatcher.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        forceVideoPlayback();
+        clickCatcher.remove();
+    }, { passive: false, once: true });
+    
+    clickCatcher.addEventListener('click', function(e) {
+        e.preventDefault();
+        forceVideoPlayback();
+        clickCatcher.remove();
+    }, { once: true });
+    
+    // Add to page immediately
+    document.body.appendChild(clickCatcher);
+    
+    // Remove after 3 seconds if not used
+    setTimeout(() => {
+        if (clickCatcher.parentNode) {
+            clickCatcher.remove();
+        }
+    }, 3000);
+    
     // Force immediate execution on iOS
     if (isiOS) {
         setTimeout(() => {
+            forceVideoPlayback();
             document.dispatchEvent(new Event('touchstart'));
-        }, 500);
+        }, 200);
     }
 });
 
