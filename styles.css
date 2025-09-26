@@ -151,6 +151,8 @@ body {
     min-height: 100vh;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 /* Ultra-comprehensive video control hiding - eliminates ALL controls and buttons */
@@ -559,6 +561,8 @@ video {
     background: #000;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
     pointer-events: none;
 }
 

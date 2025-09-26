@@ -186,7 +186,19 @@ document.addEventListener('DOMContentLoaded', function() {
         video.addEventListener('loadedmetadata', () => {
             // Ensure video always starts from the beginning
             video.currentTime = 0;
+            console.log(`📹 ${videoId} metadata loaded, duration: ${video.duration}s`);
             aggressivePlay();
+        });
+        
+        // Error handling
+        video.addEventListener('error', (e) => {
+            console.error(`❌ ${videoId} error:`, e);
+            console.error(`Video src: ${video.currentSrc || video.src}`);
+        });
+        
+        // Loading events
+        video.addEventListener('loadstart', () => {
+            console.log(`🔄 ${videoId} loading started`);
         });
         
         // PREVENT pausing
