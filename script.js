@@ -127,15 +127,38 @@ document.addEventListener('DOMContentLoaded', function() {
     let hasUserInteracted = false;
     let videosSetup = false;
     
-    // Video setup with AGGRESSIVE autoplay
-    function setupVideoForMobile(videoId) {
+    // RESPONSIVE VIDEO SETUP - Load correct quality based on screen size
+    function setupResponsiveVideo(videoId) {
         const video = document.getElementById(videoId);
         if (!video) {
             console.log(`❌ Video ${videoId} not found`);
             return null;
         }
         
-        console.log(`🔧 Setting up ${videoId} for MOBILE AUTOPLAY`);
+        const isDesktop = window.innerWidth >= 769;
+        const isHeroVideo = videoId === 'hero-video';
+        
+        console.log(`🔧 Setting up ${videoId} - Screen: ${window.innerWidth}px, Desktop: ${isDesktop}`);
+        
+        // Determine video source based on device and video type
+        let videoSrc;
+        if (isHeroVideo) {
+            videoSrc = isDesktop ? 'Videos/MAINHERO_desktop.mp4?v=10.0' : 'Videos/MAINHERO_mobile.mp4?v=10.0';
+        } else {
+            videoSrc = isDesktop ? 'Videos/LOWERVIDEO_desktop.mp4?v=10.0' : 'Videos/LOWERVIDEO_mobile.mp4?v=10.0';
+        }
+        
+        console.log(`📹 Loading ${isDesktop ? 'DESKTOP' : 'MOBILE'} version: ${videoSrc}`);
+        
+        // Clear existing sources and set new one
+        video.innerHTML = '';
+        const source = document.createElement('source');
+        source.src = videoSrc;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+        
+        // Force reload with new source
+        video.load();
         
         // FORCE all necessary attributes
         video.muted = true;
@@ -217,9 +240,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return video;
     }
     
-    // Setup both videos
-    const heroVideo = setupVideoForMobile('hero-video');
-    const showcaseVideo = setupVideoForMobile('showcase-video');
+    // Setup both videos with responsive quality
+    const heroVideo = setupResponsiveVideo('hero-video');
+    const showcaseVideo = setupResponsiveVideo('showcase-video');
     const allVideos = [heroVideo, showcaseVideo].filter(v => v !== null);
     
     videosSetup = true;
@@ -437,7 +460,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    console.log('🎥 ULTIMATE mobile video autoplay setup complete!');
+    // Handle window resize to switch video quality
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            console.log('🔄 Window resized - checking if video quality should change');
+            const newIsDesktop = window.innerWidth >= 769;
+            
+            // Check if we need to switch video quality
+            [heroVideo, showcaseVideo].forEach(video => {
+                if (video) {
+                    const currentSrc = video.querySelector('source')?.src || '';
+                    const shouldBeDesktop = newIsDesktop;
+                    const isCurrentlyDesktop = currentSrc.includes('desktop');
+                    
+                    if (shouldBeDesktop !== isCurrentlyDesktop) {
+                        console.log(`🔄 Switching ${video.id} to ${shouldBeDesktop ? 'DESKTOP' : 'MOBILE'} quality`);
+                        
+                        // Determine new source
+                        const isHeroVideo = video.id === 'hero-video';
+                        let newSrc;
+                        if (isHeroVideo) {
+                            newSrc = shouldBeDesktop ? 'Videos/MAINHERO_desktop.mp4?v=10.0' : 'Videos/MAINHERO_mobile.mp4?v=10.0';
+                        } else {
+                            newSrc = shouldBeDesktop ? 'Videos/LOWERVIDEO_desktop.mp4?v=10.0' : 'Videos/LOWERVIDEO_mobile.mp4?v=10.0';
+                        }
+                        
+                        // Switch source
+                        video.innerHTML = '';
+                        const source = document.createElement('source');
+                        source.src = newSrc;
+                        source.type = 'video/mp4';
+                        video.appendChild(source);
+                        video.load();
+                        
+                        // Restart playback
+                        setTimeout(() => {
+                            video.muted = true;
+                            video.play().catch(() => {});
+                        }, 100);
+                    }
+                }
+            });
+        }, 500); // Debounce resize events
+    });
+    
+    console.log('🎥 RESPONSIVE video system setup complete!');
 });
 
 // Add hover effects for collection items
