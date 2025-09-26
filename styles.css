@@ -151,10 +151,6 @@ body {
     min-height: 100vh;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    image-rendering: crisp-edges;
-    image-rendering: -webkit-optimize-contrast;
 }
 
 /* Ultra-comprehensive video control hiding - eliminates ALL controls and buttons */
@@ -563,11 +559,7 @@ video {
     background: #000;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
     pointer-events: none;
-    image-rendering: crisp-edges;
-    image-rendering: -webkit-optimize-contrast;
 }
 
 
@@ -832,30 +824,23 @@ video {
 @media (min-width: 769px) {
     .hero-video,
     .showcase-video {
-        transform: none !important;
-        -webkit-transform: none !important;
         object-fit: cover;
         object-position: center center;
         width: 100%;
         height: 100%;
         max-width: none;
         max-height: none;
-        image-rendering: auto;
-        image-rendering: high-quality;
-        -ms-interpolation-mode: bicubic;
     }
     
     .hero-video-container {
-        transform: none !important;
-        -webkit-transform: none !important;
         overflow: hidden;
     }
     
     /* Ensure no scaling on desktop */
     .hero-video-container,
     .video-item {
-        transform: scale(1) !important;
-        -webkit-transform: scale(1) !important;
+        transform: none !important;
+        -webkit-transform: none !important;
     }
 }
 
