@@ -136,6 +136,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         console.log(`Setting up video: ${videoId}`);
+        console.log(`Video element:`, video);
+        console.log(`Video readyState:`, video.readyState);
+        console.log(`Video src:`, video.currentSrc || video.src);
         
         // Basic reliable attributes
         video.muted = true;
@@ -148,6 +151,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Ensure video is visible
         video.style.opacity = '1';
         video.style.display = 'block';
+        video.style.visibility = 'visible';
+        video.style.zIndex = '2';
         
         // Remove any blocking attributes
         video.removeAttribute('controls');
@@ -184,15 +189,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Simple reliable play function
         function simplePlay() {
+            console.log(`Attempting to play ${videoId}`);
+            
             // Force muted state
             video.muted = true;
             video.volume = 0;
             video.controls = false;
             video.removeAttribute('controls');
             
-            // Ensure video is visible
+            // Force video to be visible
             video.style.opacity = '1';
             video.style.display = 'block';
+            video.style.visibility = 'visible';
+            video.style.zIndex = '2';
             
             // Simple play attempt
             const playPromise = video.play();
@@ -202,10 +211,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log(`${videoId} playing successfully`);
                     video.style.opacity = '1';
                     video.style.display = 'block';
+                    video.style.visibility = 'visible';
                     video.classList.add('playing');
                     
                 }).catch((error) => {
                     console.log(`${videoId} autoplay failed:`, error.name);
+                    console.log(`Video error details:`, error);
                     // Try again after user interaction
                     setTimeout(() => {
                         video.play().catch(() => {});
