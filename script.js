@@ -440,40 +440,37 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(forceVideoPlayback, 500);
     setTimeout(forceVideoPlayback, 1000);
     
-    // Add invisible click catcher that covers the entire screen
-    const clickCatcher = document.createElement('div');
-    clickCatcher.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 9999;
-        background: transparent;
-        pointer-events: auto;
-    `;
+    // Lightweight interaction capture without blocking page
+    let interactionCaptured = false;
     
-    clickCatcher.addEventListener('touchstart', function(e) {
-        e.preventDefault();
+    function captureInteraction() {
+        if (interactionCaptured) return;
+        interactionCaptured = true;
         forceVideoPlayback();
-        clickCatcher.remove();
-    }, { passive: false, once: true });
+    }
     
-    clickCatcher.addEventListener('click', function(e) {
-        e.preventDefault();
-        forceVideoPlayback();
-        clickCatcher.remove();
-    }, { once: true });
+    // Quick interaction capture that doesn't block scrolling
+    ['touchstart', 'click'].forEach(event => {
+        document.addEventListener(event, captureInteraction, { 
+            once: true, 
+            passive: true,
+            capture: false
+        });
+    });
     
-    // Add to page immediately
-    document.body.appendChild(clickCatcher);
+    // Separate scroll listener that doesn't interfere with animations
+    document.addEventListener('scroll', captureInteraction, { 
+        once: true, 
+        passive: true
+    });
     
-    // Remove after 3 seconds if not used
+    // Auto-remove listeners after 2 seconds
     setTimeout(() => {
-        if (clickCatcher.parentNode) {
-            clickCatcher.remove();
-        }
-    }, 3000);
+        ['touchstart', 'click'].forEach(event => {
+            document.removeEventListener(event, captureInteraction);
+        });
+        document.removeEventListener('scroll', captureInteraction);
+    }, 2000);
     
     // Force immediate execution on iOS
     if (isiOS) {
