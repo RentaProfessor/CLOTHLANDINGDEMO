@@ -155,15 +155,9 @@ body {
     -webkit-transform: translateZ(0);
 }
 
-/* Ultra-comprehensive video control hiding - eliminates ALL controls and buttons */
+/* Basic video styling */
 video {
-    outline: none !important;
-    pointer-events: none !important;
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    user-select: none !important;
-    -webkit-touch-callout: none !important;
+    outline: none;
 }
 
 video::-webkit-media-controls,
