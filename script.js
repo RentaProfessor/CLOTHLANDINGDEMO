@@ -183,7 +183,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Event listeners for reliability
         video.addEventListener('loadeddata', aggressivePlay);
         video.addEventListener('canplay', aggressivePlay);
-        video.addEventListener('loadedmetadata', aggressivePlay);
+        video.addEventListener('loadedmetadata', () => {
+            // Ensure video always starts from the beginning
+            video.currentTime = 0;
+            aggressivePlay();
+        });
         
         // PREVENT pausing
         video.addEventListener('pause', () => {
