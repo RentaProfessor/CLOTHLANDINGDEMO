@@ -113,7 +113,7 @@ if (contactForm) {
 //     }
 // });
 
-// Ultra-aggressive mobile video autoplay with canvas fallback
+// Simplified and reliable video autoplay
 document.addEventListener('DOMContentLoaded', function() {
     const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -123,35 +123,35 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.add('in-iframe');
     }
     
-    // Aggressive video setup for each video
+    console.log('Initializing video autoplay...');
+    
+    // Simplified video setup for each video
     function setupVideo(videoId, canvasId) {
         const video = document.getElementById(videoId);
         const canvas = document.getElementById(canvasId);
         
-        if (!video) return;
+        if (!video) {
+            console.log(`Video ${videoId} not found`);
+            return;
+        }
         
-        // Set ultra-aggressive attributes
+        console.log(`Setting up video: ${videoId}`);
+        
+        // Basic reliable attributes
         video.muted = true;
-        video.defaultMuted = true;
         video.autoplay = true;
         video.loop = true;
         video.playsInline = true;
         video.controls = false;
         video.preload = 'auto';
         
+        // Ensure video is visible
+        video.style.opacity = '1';
+        video.style.display = 'block';
+        
         // Remove any blocking attributes
         video.removeAttribute('controls');
         video.removeAttribute('poster');
-        
-        // Force iOS-specific attributes
-        if (isiOS) {
-            video.setAttribute('webkit-playsinline', 'true');
-            video.setAttribute('playsinline', 'true');
-            video.style.webkitAppearance = 'none';
-            video.style.webkitUserSelect = 'none';
-            video.style.webkitTouchCallout = 'none';
-            video.style.webkitTapHighlightColor = 'transparent';
-        }
         
         // Canvas fallback function
         function useCanvasFallback() {
@@ -182,87 +182,48 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Ultra-aggressive play function
-        let playAttempts = 0;
-        function ultraPlay() {
-            playAttempts++;
-            
+        // Simple reliable play function
+        function simplePlay() {
             // Force muted state
             video.muted = true;
             video.volume = 0;
             video.controls = false;
             video.removeAttribute('controls');
             
-            // Force seek to ensure video isn't stuck on first frame
-            if (video.readyState >= 2) {
-                video.currentTime = 0.1;
-                setTimeout(() => {
-                    video.currentTime = 0;
-                }, 50);
-            }
+            // Ensure video is visible
+            video.style.opacity = '1';
+            video.style.display = 'block';
             
-            // Immediate play attempt
+            // Simple play attempt
             const playPromise = video.play();
             
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    console.log(`${videoId} autoplay SUCCESS on attempt ${playAttempts}`);
+                    console.log(`${videoId} playing successfully`);
                     video.style.opacity = '1';
                     video.style.display = 'block';
                     video.classList.add('playing');
                     
-                    // Ensure it keeps playing and isn't stuck
-                    setTimeout(() => {
-                        if (video.paused || video.currentTime === 0) {
-                            video.currentTime = 0.1;
-                            video.play().catch(() => {});
-                        }
-                    }, 100);
-                    
-                    // Additional check for stuck video
-                    setTimeout(() => {
-                        if (video.currentTime === 0 && !video.paused) {
-                            video.currentTime = 0.1;
-                        }
-                    }, 500);
-                    
                 }).catch((error) => {
-                    console.log(`${videoId} autoplay FAILED on attempt ${playAttempts}:`, error.name);
-                    
-                    // Try canvas fallback for iOS
-                    if (isiOS && playAttempts < 3) {
-                        setTimeout(() => {
-                            video.load();
-                            ultraPlay();
-                        }, 100);
-                    } else if (playAttempts < 5) {
-                        setTimeout(ultraPlay, 200);
-                    } else {
-                        console.log(`${videoId} switching to canvas fallback`);
-                        useCanvasFallback();
-                    }
+                    console.log(`${videoId} autoplay failed:`, error.name);
+                    // Try again after user interaction
+                    setTimeout(() => {
+                        video.play().catch(() => {});
+                    }, 1000);
                 });
             }
         }
         
-        // Multiple event triggers
-        video.addEventListener('loadstart', ultraPlay);
-        video.addEventListener('loadedmetadata', ultraPlay);
-        video.addEventListener('loadeddata', ultraPlay);
-        video.addEventListener('canplay', ultraPlay);
-        video.addEventListener('canplaythrough', ultraPlay);
+        // Event triggers
+        video.addEventListener('loadeddata', simplePlay);
+        video.addEventListener('canplay', simplePlay);
         
-        // Force load and immediate play
+        // Force load and play
         video.load();
-        ultraPlay();
         
-        // Staggered attempts
-        setTimeout(ultraPlay, 10);
-        setTimeout(ultraPlay, 50);
-        setTimeout(ultraPlay, 150);
-        setTimeout(ultraPlay, 300);
-        setTimeout(ultraPlay, 500);
-        setTimeout(ultraPlay, 1000);
+        // Try playing after a short delay
+        setTimeout(simplePlay, 100);
+        setTimeout(simplePlay, 500);
         
         // Event handlers
         video.addEventListener('playing', () => {
@@ -287,13 +248,10 @@ document.addEventListener('DOMContentLoaded', function() {
         video.addEventListener('stalled', () => {
             console.log(`${videoId} stalled - reloading`);
             video.load();
-            setTimeout(ultraPlay, 100);
+            setTimeout(simplePlay, 100);
         });
         
-        // Continuous maintenance with shorter interval
-        let lastCurrentTime = 0;
-        let stuckCount = 0;
-        
+        // Simple maintenance
         const maintenance = setInterval(() => {
             // Remove controls
             if (video.hasAttribute('controls') || video.controls) {
@@ -302,39 +260,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Force muted
-            if (!video.muted || video.volume > 0) {
+            if (!video.muted) {
                 video.muted = true;
                 video.volume = 0;
             }
             
-            // Auto-restart
+            // Auto-restart if paused
             if (video.paused && !video.ended && video.readyState >= 2) {
-                video.currentTime = 0.1;
                 video.play().catch(() => {});
             }
             
-            // Check for stuck video (currentTime not progressing)
-            if (!video.paused && video.readyState >= 2) {
-                if (video.currentTime === lastCurrentTime && video.currentTime === 0) {
-                    stuckCount++;
-                    if (stuckCount > 5) {
-                        console.log(`${videoId} appears stuck - forcing seek and play`);
-                        video.currentTime = 0.1;
-                        video.play().catch(() => {});
-                        stuckCount = 0;
-                    }
-                } else {
-                    stuckCount = 0;
-                }
-                lastCurrentTime = video.currentTime;
-            }
-            
             // Ensure visibility
-            if (!video.paused && video.readyState >= 2) {
-                video.style.opacity = '1';
-                video.style.display = 'block';
-            }
-        }, 100);
+            video.style.opacity = '1';
+            video.style.display = 'block';
+        }, 1000);
         
         // Cleanup
         video.addEventListener('emptied', () => clearInterval(maintenance));
@@ -407,77 +346,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 200);
     });
     
-    // Immediate video play trigger for mobile
-    function forceVideoPlayback() {
+    // Simple user interaction for video play
+    let interactionCaptured = false;
+    
+    function playAllVideos() {
+        if (interactionCaptured) return;
+        interactionCaptured = true;
+        
         ['hero-video', 'showcase-video'].forEach(id => {
             const video = document.getElementById(id);
             if (video) {
                 video.muted = true;
-                video.volume = 0;
-                video.currentTime = 0.1; // Force seek to trigger play
-                
-                const playPromise = video.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        console.log(`${id} forced play SUCCESS`);
-                        video.style.opacity = '1';
-                        video.classList.add('playing');
-                    }).catch(() => {
-                        console.log(`${id} forced play FAILED`);
-                        // Try seeking and playing again
-                        setTimeout(() => {
-                            video.currentTime = 0;
-                            video.play().catch(() => {});
-                        }, 100);
-                    });
-                }
+                video.play().then(() => {
+                    console.log(`${id} playing after interaction`);
+                    video.style.opacity = '1';
+                }).catch(() => {
+                    console.log(`${id} failed to play after interaction`);
+                });
             }
         });
     }
     
-    // Immediate triggers on page load
-    setTimeout(forceVideoPlayback, 100);
-    setTimeout(forceVideoPlayback, 500);
-    setTimeout(forceVideoPlayback, 1000);
-    
-    // Lightweight interaction capture without blocking page
-    let interactionCaptured = false;
-    
-    function captureInteraction() {
-        if (interactionCaptured) return;
-        interactionCaptured = true;
-        forceVideoPlayback();
-    }
-    
-    // Quick interaction capture that doesn't block scrolling
-    ['touchstart', 'click'].forEach(event => {
-        document.addEventListener(event, captureInteraction, { 
+    // Listen for any user interaction
+    ['touchstart', 'click', 'scroll'].forEach(event => {
+        document.addEventListener(event, playAllVideos, { 
             once: true, 
-            passive: true,
-            capture: false
+            passive: true
         });
     });
-    
-    // Separate scroll listener that doesn't interfere with animations
-    document.addEventListener('scroll', captureInteraction, { 
-        once: true, 
-        passive: true
-    });
-    
-    // Auto-remove listeners after 2 seconds
-    setTimeout(() => {
-        ['touchstart', 'click'].forEach(event => {
-            document.removeEventListener(event, captureInteraction);
-        });
-        document.removeEventListener('scroll', captureInteraction);
-    }, 2000);
     
     // Force immediate execution on iOS
     if (isiOS) {
         setTimeout(() => {
-            forceVideoPlayback();
-            document.dispatchEvent(new Event('touchstart'));
-        }, 200);
+            playAllVideos();
+        }, 500);
     }
 });
 
@@ -492,32 +394,7 @@ document.querySelectorAll('.collection-item').forEach(item => {
     });
 });
 
-// Add typing effect for hero title
-function typeWriter(element, text, speed = 100) {
-    let i = 0;
-    element.innerHTML = '';
-    
-    function type() {
-        if (i < text.length) {
-            element.innerHTML += text.charAt(i);
-            i++;
-            setTimeout(type, speed);
-        }
-    }
-    
-    type();
-}
-
-// Initialize typing effect when page loads
-window.addEventListener('load', function() {
-    const heroTitle = document.querySelector('.hero-title');
-    if (heroTitle) {
-        const originalText = heroTitle.textContent;
-        setTimeout(() => {
-            typeWriter(heroTitle, originalText, 50);
-        }, 500);
-    }
-});
+// Typing effect removed - hero title displays normally
 
 // Add scroll progress indicator
 function createScrollProgress() {

@@ -8,6 +8,7 @@
 html {
     background-color: #000000;
     overflow-x: hidden;
+    height: 100%;
 }
 
 body {
@@ -16,7 +17,9 @@ body {
     color: #ffffff;
     line-height: 1.6;
     overflow-x: hidden;
-    min-height: 100vh;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
