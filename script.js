@@ -143,9 +143,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Determine video source based on device and video type
         let videoSrc;
         if (isHeroVideo) {
-            videoSrc = isDesktop ? 'Videos/MAINHERO_desktop.mp4?v=10.0' : 'Videos/MAINHERO_mobile.mp4?v=10.0';
+            videoSrc = isDesktop ? 'Videos/MAINHEROUNCOMPRESSEDHIGHQUALITYDESKTOP.mp4?v=11.0' : 'Videos/MAINHERO_mobile.mp4?v=11.0';
         } else {
-            videoSrc = isDesktop ? 'Videos/LOWERVIDEO_desktop.mp4?v=10.0' : 'Videos/LOWERVIDEO_mobile.mp4?v=10.0';
+            videoSrc = isDesktop ? 'Videos/LOWERVIDEO_desktop.mp4?v=11.0' : 'Videos/LOWERVIDEO_mobile.mp4?v=11.0';
         }
         
         console.log(`📹 Loading ${isDesktop ? 'DESKTOP' : 'MOBILE'} version: ${videoSrc}`);
@@ -482,9 +482,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         const isHeroVideo = video.id === 'hero-video';
                         let newSrc;
                         if (isHeroVideo) {
-                            newSrc = shouldBeDesktop ? 'Videos/MAINHERO_desktop.mp4?v=10.0' : 'Videos/MAINHERO_mobile.mp4?v=10.0';
+                            newSrc = shouldBeDesktop ? 'Videos/MAINHEROUNCOMPRESSEDHIGHQUALITYDESKTOP.mp4?v=11.0' : 'Videos/MAINHERO_mobile.mp4?v=11.0';
                         } else {
-                            newSrc = shouldBeDesktop ? 'Videos/LOWERVIDEO_desktop.mp4?v=10.0' : 'Videos/LOWERVIDEO_mobile.mp4?v=10.0';
+                            newSrc = shouldBeDesktop ? 'Videos/LOWERVIDEO_desktop.mp4?v=11.0' : 'Videos/LOWERVIDEO_mobile.mp4?v=11.0';
                         }
                         
                         // Switch source
