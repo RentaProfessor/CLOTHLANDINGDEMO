@@ -113,285 +113,164 @@ if (contactForm) {
 //     }
 // });
 
-// Simplified and reliable video autoplay
+// ULTIMATE MOBILE VIDEO AUTOPLAY SOLUTION
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎥 Initializing ULTIMATE mobile video autoplay...');
+    
     const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isInIframe = window.self !== window.top;
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
     
-    if (isInIframe) {
-        document.body.classList.add('in-iframe');
-    }
+    console.log('Device detection:', { isMobile, isiOS, isSafari });
     
-    console.log('Initializing video autoplay...');
+    // Global state tracking
+    let hasUserInteracted = false;
+    let videosSetup = false;
     
-    // Simplified video setup for each video
-    function setupVideo(videoId, canvasId) {
+    // Video setup with AGGRESSIVE autoplay
+    function setupVideoForMobile(videoId) {
         const video = document.getElementById(videoId);
-        const canvas = document.getElementById(canvasId);
-        
         if (!video) {
-            console.log(`Video ${videoId} not found`);
-            return;
+            console.log(`❌ Video ${videoId} not found`);
+            return null;
         }
         
-        console.log(`Setting up video: ${videoId}`);
-        console.log(`Video element:`, video);
-        console.log(`Video readyState:`, video.readyState);
-        console.log(`Video src:`, video.currentSrc || video.src);
+        console.log(`🔧 Setting up ${videoId} for MOBILE AUTOPLAY`);
         
-        // Basic reliable attributes
+        // FORCE all necessary attributes
         video.muted = true;
+        video.volume = 0;
         video.autoplay = true;
         video.loop = true;
         video.playsInline = true;
         video.controls = false;
         video.preload = 'auto';
         
-        // Ensure video is visible
-        video.style.opacity = '1';
-        video.style.display = 'block';
-        video.style.visibility = 'visible';
-        video.style.zIndex = '2';
-        
-        // Remove any blocking attributes
+        // REMOVE problematic attributes
         video.removeAttribute('controls');
         video.removeAttribute('poster');
+        video.setAttribute('webkit-playsinline', '');
+        video.setAttribute('playsinline', '');
+        video.setAttribute('x5-playsinline', '');
         
-        // Canvas fallback function
-        function useCanvasFallback() {
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            canvas.width = video.videoWidth || 1920;
-            canvas.height = video.videoHeight || 1080;
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            canvas.style.objectFit = 'cover';
-            
-            function drawFrame() {
-                if (video.readyState >= 2) {
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                }
-                requestAnimationFrame(drawFrame);
-            }
-            
-            video.addEventListener('loadeddata', () => {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                drawFrame();
-                
-                // Show canvas instead of video
-                canvas.style.display = 'block';
-                video.style.display = 'none';
-            });
-        }
+        // FORCE visibility and remove pointer events
+        video.style.pointerEvents = 'none';
+        video.style.userSelect = 'none';
+        video.style.webkitUserSelect = 'none';
+        video.style.touchAction = 'none';
+        video.style.webkitTouchCallout = 'none';
         
-        // Simple reliable play function
-        function simplePlay() {
-            console.log(`Attempting to play ${videoId}`);
-            
-            // Force muted state
-            video.muted = true;
-            video.volume = 0;
-            video.controls = false;
-            video.removeAttribute('controls');
-            
-            // Force video to be visible
-            video.style.opacity = '1';
-            video.style.display = 'block';
-            video.style.visibility = 'visible';
-            video.style.zIndex = '2';
-            
-            // Simple play attempt
-            const playPromise = video.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    console.log(`${videoId} playing successfully`);
-                    video.style.opacity = '1';
-                    video.style.display = 'block';
-                    video.style.visibility = 'visible';
-                    video.classList.add('playing');
-                    
-                }).catch((error) => {
-                    console.log(`${videoId} autoplay failed:`, error.name);
-                    console.log(`Video error details:`, error);
-                    // Try again after user interaction
-                    setTimeout(() => {
-                        video.play().catch(() => {});
-                    }, 1000);
-                });
-            }
-        }
-        
-        // Event triggers
-        video.addEventListener('loadeddata', simplePlay);
-        video.addEventListener('canplay', simplePlay);
-        
-        // Force load and play
-        video.load();
-        
-        // Try playing after a short delay
-        setTimeout(simplePlay, 100);
-        setTimeout(simplePlay, 500);
-        
-        // Event handlers
-        video.addEventListener('playing', () => {
-            video.style.opacity = '1';
-            video.style.display = 'block';
-            video.classList.add('playing');
-            console.log(`${videoId} is now playing`);
-        });
-        
-        video.addEventListener('pause', () => {
-            console.log(`${videoId} paused - restarting`);
-            if (!video.ended) {
-                setTimeout(() => video.play().catch(() => {}), 25);
-            }
-        });
-        
-        video.addEventListener('waiting', () => {
-            console.log(`${videoId} waiting - forcing play`);
-            video.play().catch(() => {});
-        });
-        
-        video.addEventListener('stalled', () => {
-            console.log(`${videoId} stalled - reloading`);
-            video.load();
-            setTimeout(simplePlay, 100);
-        });
-        
-        // Simple maintenance
-        const maintenance = setInterval(() => {
-            // Remove controls
-            if (video.hasAttribute('controls') || video.controls) {
-                video.removeAttribute('controls');
-                video.controls = false;
-            }
-            
-            // Force muted
-            if (!video.muted) {
+        // AGGRESSIVE play function
+        function aggressivePlay() {
+            if (video.paused) {
                 video.muted = true;
                 video.volume = 0;
+                video.removeAttribute('controls');
+                
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log(`✅ ${videoId} playing successfully`);
+                        video.style.opacity = '1';
+                        video.classList.add('playing');
+                    }).catch((error) => {
+                        console.log(`⚠️ ${videoId} play failed (${error.name}) - will retry on interaction`);
+                    });
+                }
             }
-            
-            // Auto-restart if paused
-            if (video.paused && !video.ended && video.readyState >= 2) {
-                video.play().catch(() => {});
-            }
-            
-            // Ensure visibility
-            video.style.opacity = '1';
-            video.style.display = 'block';
-        }, 1000);
+        }
         
-        // Cleanup
-        video.addEventListener('emptied', () => clearInterval(maintenance));
+        // Event listeners for reliability
+        video.addEventListener('loadeddata', aggressivePlay);
+        video.addEventListener('canplay', aggressivePlay);
+        video.addEventListener('loadedmetadata', aggressivePlay);
+        
+        // PREVENT pausing
+        video.addEventListener('pause', () => {
+            if (!video.ended && hasUserInteracted) {
+                setTimeout(aggressivePlay, 10);
+            }
+        });
+        
+        // Force immediate play attempts
+        video.load();
+        setTimeout(aggressivePlay, 50);
+        setTimeout(aggressivePlay, 200);
+        setTimeout(aggressivePlay, 500);
+        
+        return video;
     }
     
     // Setup both videos
-    setupVideo('hero-video', 'hero-canvas');
-    setupVideo('showcase-video', 'showcase-canvas');
+    const heroVideo = setupVideoForMobile('hero-video');
+    const showcaseVideo = setupVideoForMobile('showcase-video');
+    const allVideos = [heroVideo, showcaseVideo].filter(v => v !== null);
     
-    // IMMEDIATE VIDEO AUTOPLAY - Intersection Observer approach
-    const videoObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const video = entry.target;
-                const videoId = video.id;
-                
-                console.log(`Video ${videoId} is visible - forcing immediate play`);
-                
-                // Force immediate play when video becomes visible
+    videosSetup = true;
+    
+    // ULTIMATE USER INTERACTION HANDLER
+    function handleUserInteraction(eventType) {
+        if (hasUserInteracted) return;
+        hasUserInteracted = true;
+        
+        console.log(`🎯 User interaction detected (${eventType}) - FORCE PLAYING ALL VIDEOS`);
+        
+        allVideos.forEach(video => {
+            if (video && video.paused) {
                 video.muted = true;
                 video.volume = 0;
                 video.removeAttribute('controls');
-                video.style.opacity = '1';
-                video.style.display = 'block';
-                video.style.visibility = 'visible';
+                video.style.pointerEvents = 'none';
                 
-                // Multiple immediate play attempts
-                const playImmediately = () => {
-                    video.play().then(() => {
-                        console.log(`${videoId} IMMEDIATE AUTOPLAY SUCCESS`);
-                        video.style.opacity = '1';
-                        video.classList.add('playing');
-                        videoObserver.unobserve(video); // Stop observing once playing
-                    }).catch(() => {
-                        console.log(`${videoId} immediate play failed, retrying...`);
-                        // Retry immediately
-                        setTimeout(playImmediately, 10);
-                    });
-                };
-                
-                // Try playing immediately
-                playImmediately();
-                
-                // Also try with slight delays
-                setTimeout(playImmediately, 1);
-                setTimeout(playImmediately, 10);
-                setTimeout(playImmediately, 50);
+                video.play().then(() => {
+                    console.log(`✅ ${video.id} FORCE PLAY SUCCESS via ${eventType}`);
+                    video.style.opacity = '1';
+                }).catch(error => {
+                    console.log(`❌ ${video.id} FORCE PLAY FAILED: ${error.name}`);
+                });
             }
         });
-    }, {
-        threshold: 0.1, // Trigger when 10% of video is visible
-        rootMargin: '50px' // Start slightly before it's fully visible
+        
+        // Continue monitoring and force play
+        setInterval(() => {
+            allVideos.forEach(video => {
+                if (video && video.paused && !video.ended) {
+                    video.muted = true;
+                    video.play().catch(() => {});
+                }
+            });
+        }, 2000);
+    }
+    
+    // CAPTURE ALL POSSIBLE USER INTERACTIONS
+    const allEvents = [
+        'touchstart', 'touchmove', 'touchend', 'touchcancel',
+        'click', 'mousedown', 'mouseup', 'mousemove',
+        'scroll', 'wheel', 'keydown', 'keyup',
+        'pointerdown', 'pointerup', 'pointermove',
+        'gesturestart', 'gesturechange', 'gestureend'
+    ];
+    
+    allEvents.forEach(eventType => {
+        document.addEventListener(eventType, () => handleUserInteraction(eventType), {
+            once: true,
+            passive: true,
+            capture: true
+        });
+        window.addEventListener(eventType, () => handleUserInteraction(eventType), {
+            once: true,
+            passive: true,
+            capture: true
+        });
     });
     
-    // Observe both videos immediately
-    const heroVideo = document.getElementById('hero-video');
-    const showcaseVideo = document.getElementById('showcase-video');
-    
-    if (heroVideo) {
-        videoObserver.observe(heroVideo);
-        console.log('Observing hero video for immediate autoplay');
-    }
-    if (showcaseVideo) {
-        videoObserver.observe(showcaseVideo);
-        console.log('Observing showcase video for immediate autoplay');
-    }
-    
-    // Global fallback handlers
-    let interactionTriggered = false;
-    
-    function triggerAllVideos() {
-        if (interactionTriggered) return;
-        interactionTriggered = true;
-        
-        const videos = ['hero-video', 'showcase-video'];
-        videos.forEach(id => {
-            const video = document.getElementById(id);
-            if (video) {
-                video.muted = true;
-                video.volume = 0;
-                video.removeAttribute('controls');
-                video.play().then(() => {
-                    video.style.opacity = '1';
-                    video.classList.add('playing');
-                }).catch(() => console.log(`${id} fallback failed`));
-            }
-        });
-    }
-    
-    // Immediate triggers
-    if (isMobile || isiOS) {
-        ['touchstart', 'touchmove', 'click', 'scroll', 'keydown'].forEach(event => {
-            document.addEventListener(event, triggerAllVideos, { 
-                once: true, 
-                passive: true,
-                capture: true 
-            });
-        });
-    }
-    
-    // Page visibility handling
+    // VISIBILITY AND FOCUS HANDLERS
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
+        if (!document.hidden && videosSetup) {
+            console.log('📱 Page visible - FORCE PLAYING');
             setTimeout(() => {
-                ['hero-video', 'showcase-video'].forEach(id => {
-                    const video = document.getElementById(id);
-                    if (video && video.paused && !video.ended) {
+                allVideos.forEach(video => {
+                    if (video && video.paused) {
                         video.muted = true;
                         video.play().catch(() => {});
                     }
@@ -400,174 +279,149 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Orientation change handling
-    window.addEventListener('orientationchange', () => {
-        setTimeout(() => {
-            ['hero-video', 'showcase-video'].forEach(id => {
-                const video = document.getElementById(id);
-                if (video) {
-                    video.style.objectFit = 'cover';
-                    if (video.paused && !video.ended) {
-                        video.play().catch(() => {});
-                    }
-                }
-            });
-        }, 200);
-    });
-    
-    // Simple user interaction for video play
-    let interactionCaptured = false;
-    
-    function playAllVideos() {
-        if (interactionCaptured) return;
-        interactionCaptured = true;
-        
-        ['hero-video', 'showcase-video'].forEach(id => {
-            const video = document.getElementById(id);
-            if (video) {
-                video.muted = true;
-                video.play().then(() => {
-                    console.log(`${id} playing after interaction`);
-                    video.style.opacity = '1';
-                }).catch(() => {
-                    console.log(`${id} failed to play after interaction`);
-                });
-            }
-        });
-    }
-    
-    // Listen for any user interaction
-    ['touchstart', 'click', 'scroll'].forEach(event => {
-        document.addEventListener(event, playAllVideos, { 
-            once: true, 
-            passive: true
-        });
-    });
-    
-    // IMMEDIATE PAGE VISIBILITY AUTOPLAY
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            console.log('Page became visible - triggering immediate video autoplay');
-            
-            // Immediate play when page becomes visible
-            ['hero-video', 'showcase-video'].forEach(id => {
-                const video = document.getElementById(id);
-                if (video) {
-                    video.muted = true;
-                    video.volume = 0;
-                    video.removeAttribute('controls');
-                    video.style.opacity = '1';
-                    video.style.visibility = 'visible';
-                    
-                    // Multiple immediate attempts
-                    const immediatePlay = () => {
-                        video.play().then(() => {
-                            console.log(`${id} VISIBILITY AUTOPLAY SUCCESS`);
-                            video.style.opacity = '1';
-                        }).catch(() => {
-                            setTimeout(immediatePlay, 5);
-                        });
-                    };
-                    
-                    immediatePlay();
-                    setTimeout(immediatePlay, 1);
-                    setTimeout(immediatePlay, 10);
-                    setTimeout(immediatePlay, 50);
-                }
-            });
-        }
-    });
-    
-    // IMMEDIATE FOCUS AUTOPLAY
     window.addEventListener('focus', () => {
-        console.log('Window focused - triggering immediate video autoplay');
-        
-        ['hero-video', 'showcase-video'].forEach(id => {
-            const video = document.getElementById(id);
-            if (video && video.paused) {
-                video.muted = true;
-                video.play().then(() => {
-                    console.log(`${id} FOCUS AUTOPLAY SUCCESS`);
-                }).catch(() => {});
-            }
-        });
-    });
-    
-    // PROVEN MOBILE AUTOPLAY METHODS
-    
-    // Method 1: Immediate play on ANY touch/scroll (most sites use this)
-    let autoplayTriggered = false;
-    
-    function triggerImmediateAutoplay(event) {
-        if (autoplayTriggered) return;
-        autoplayTriggered = true;
-        
-        console.log('User interaction detected - immediate autoplay');
-        
-        ['hero-video', 'showcase-video'].forEach(id => {
-            const video = document.getElementById(id);
-            if (video) {
-                video.muted = true;
-                video.volume = 0;
-                video.style.opacity = '1';
-                video.style.visibility = 'visible';
-                
-                // Immediate play
-                video.play().then(() => {
-                    console.log(`${id} IMMEDIATE SUCCESS via ${event.type}`);
-                    video.style.opacity = '1';
-                }).catch(e => {
-                    console.log(`${id} failed:`, e.name);
-                });
-            }
-        });
-    }
-    
-    // Capture EVERYTHING - this is what mobile sites do
-    const events = ['touchstart', 'touchmove', 'touchend', 'click', 'scroll', 'mousemove', 'keydown', 'wheel'];
-    events.forEach(eventType => {
-        document.addEventListener(eventType, triggerImmediateAutoplay, { 
-            once: true, 
-            passive: true, 
-            capture: true 
-        });
-    });
-    
-    // Method 2: Play on window load (when page is fully ready)
-    window.addEventListener('load', () => {
-        console.log('Window loaded - attempting autoplay');
-        setTimeout(() => {
-            ['hero-video', 'showcase-video'].forEach(id => {
-                const video = document.getElementById(id);
+        if (videosSetup) {
+            console.log('🔍 Window focused - FORCE PLAYING');
+            allVideos.forEach(video => {
                 if (video && video.paused) {
                     video.muted = true;
                     video.play().catch(() => {});
                 }
             });
-        }, 100);
+        }
     });
     
-    // Method 3: Play when page becomes interactive
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                ['hero-video', 'showcase-video'].forEach(id => {
-                    const video = document.getElementById(id);
-                    if (video && video.paused) {
+    // ORIENTATION CHANGE HANDLER
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            console.log('🔄 Orientation changed - FORCE PLAYING');
+            allVideos.forEach(video => {
+                if (video) {
+                    video.style.objectFit = 'cover';
+                    if (video.paused && hasUserInteracted) {
                         video.muted = true;
                         video.play().catch(() => {});
                     }
-                });
-            }, 500);
+                }
+            });
+        }, 300);
+    });
+    
+    // INTERSECTION OBSERVER FOR IMMEDIATE PLAY
+    if ('IntersectionObserver' in window) {
+        const videoObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const video = entry.target;
+                    console.log(`👁️ ${video.id} is visible - IMMEDIATE PLAY`);
+                    
+                    if (video.paused) {
+                        video.muted = true;
+                        video.volume = 0;
+                        video.removeAttribute('controls');
+                        
+                        // Multiple immediate attempts
+                        const tryPlay = () => {
+                            video.play().then(() => {
+                                console.log(`✅ ${video.id} INTERSECTION AUTOPLAY SUCCESS`);
+                                video.style.opacity = '1';
+                                videoObserver.unobserve(video);
+                            }).catch(() => {
+                                setTimeout(tryPlay, 50);
+                            });
+                        };
+                        
+                        tryPlay();
+                        setTimeout(tryPlay, 1);
+                        setTimeout(tryPlay, 10);
+                        setTimeout(tryPlay, 100);
+                    }
+                }
+            });
+        }, {
+            threshold: 0.01,
+            rootMargin: '100px'
+        });
+        
+        allVideos.forEach(video => {
+            if (video) videoObserver.observe(video);
         });
     }
     
-    // Force immediate execution on iOS
-    if (isiOS) {
-        setTimeout(() => {
-            playAllVideos();
-        }, 100);
+    // SAFARI-SPECIFIC AUTOPLAY FIXES
+    if (isSafari || isiOS) {
+        console.log('🍎 Safari/iOS detected - applying specific fixes');
+        
+        // Safari often requires a programmatic play() call after load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('🍎 Safari page loaded - FORCE PLAYING');
+                allVideos.forEach(video => {
+                    if (video && video.paused) {
+                        video.muted = true;
+                        video.volume = 0;
+                        video.play().catch(() => {});
+                    }
+                });
+            }, 100);
+        });
+        
+        // Safari requires this for proper autoplay
+        allVideos.forEach(video => {
+            if (video) {
+                video.setAttribute('webkit-playsinline', 'true');
+                video.setAttribute('playsinline', 'true');
+                video.webkitEnterFullscreen = undefined;
+                video.webkitExitFullscreen = undefined;
+            }
+        });
     }
+    
+    // MAINTENANCE LOOP - keeps videos playing
+    let maintenanceStarted = false;
+    
+    function startMaintenance() {
+        if (maintenanceStarted) return;
+        maintenanceStarted = true;
+        
+        setInterval(() => {
+            allVideos.forEach(video => {
+                if (video) {
+                    // Force remove controls
+                    if (video.hasAttribute('controls') || video.controls) {
+                        video.removeAttribute('controls');
+                        video.controls = false;
+                    }
+                    
+                    // Force muted
+                    if (!video.muted || video.volume > 0) {
+                        video.muted = true;
+                        video.volume = 0;
+                    }
+                    
+                    // Force visible
+                    if (video.style.opacity !== '1') {
+                        video.style.opacity = '1';
+                    }
+                    
+                    // Auto-restart if paused (only after user interaction)
+                    if (video.paused && !video.ended && hasUserInteracted && video.readyState >= 2) {
+                        video.play().catch(() => {});
+                    }
+                }
+            });
+        }, 1000);
+    }
+    
+    // Start maintenance after first interaction
+    allEvents.slice(0, 5).forEach(eventType => {
+        document.addEventListener(eventType, startMaintenance, { 
+            once: true, 
+            passive: true 
+        });
+    });
+    
+    console.log('🎥 ULTIMATE mobile video autoplay setup complete!');
 });
 
 // Add hover effects for collection items

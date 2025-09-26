@@ -154,96 +154,161 @@ body {
     -webkit-transform: translateZ(0);
 }
 
-/* Comprehensive video control hiding for all browsers */
-video::-webkit-media-controls {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
+/* Ultra-comprehensive video control hiding - eliminates ALL controls and buttons */
+video {
+    outline: none !important;
     pointer-events: none !important;
-    position: absolute !important;
-    left: -9999px !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
 }
 
-video::-webkit-media-controls-start-playback-button {
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-overlay-enclosure,
+video::-webkit-media-controls-fullscreen-button,
+video::-webkit-media-controls-timeline,
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display,
+video::-webkit-media-controls-mute-button,
+video::-webkit-media-controls-volume-slider,
+video::-webkit-media-controls-volume-slider-container,
+video::-webkit-media-controls-rewind-button,
+video::-webkit-media-controls-seek-back-button,
+video::-webkit-media-controls-seek-forward-button,
+video::-webkit-media-controls-toggle-closed-captions-button {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
     position: absolute !important;
-    left: -9999px !important;
-}
-
-video::-webkit-media-controls-play-button {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    position: absolute !important;
-    left: -9999px !important;
-}
-
-video::-webkit-media-controls-overlay-play-button {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    position: absolute !important;
-    left: -9999px !important;
+    left: -10000px !important;
+    top: -10000px !important;
     width: 0 !important;
     height: 0 !important;
-    z-index: -999 !important;
+    z-index: -9999 !important;
     transform: scale(0) !important;
+    -webkit-transform: scale(0) !important;
+    -webkit-appearance: none !important;
+    background: transparent !important;
+    border: none !important;
 }
 
-video::-webkit-media-controls-panel {
+/* Specific targeting for Chrome's overlay play button */
+video::-webkit-media-controls-overlay-play-button {
     display: none !important;
+    -webkit-appearance: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
     position: absolute !important;
-    left: -9999px !important;
+    left: -10000px !important;
+    top: -10000px !important;
+    width: 0 !important;
+    height: 0 !important;
+    transform: scale(0) !important;
+    z-index: -9999 !important;
 }
 
-video::-webkit-media-controls-fullscreen-button {
+/* Force hide any shadow DOM controls */
+video::shadow,
+video /deep/ * {
     display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
 }
 
-video::-webkit-media-controls-timeline {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-}
-
-video::-webkit-media-controls-current-time-display {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-}
-
-video::-webkit-media-controls-time-remaining-display {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-}
-
-video::-webkit-media-controls-mute-button {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-}
-
-video::-webkit-media-controls-volume-slider {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-}
-
+/* Disable right-click context menu */
 video {
-    outline: none;
-    pointer-events: none;
+    -webkit-context-menu: none !important;
+    context-menu: none !important;
+}
+
+/* MOBILE-SPECIFIC VIDEO CONTROL ELIMINATION */
+@media (hover: none) and (pointer: coarse) {
+    /* Complete control elimination for mobile */
+    video::-webkit-media-controls,
+    video::-webkit-media-controls-start-playback-button,
+    video::-webkit-media-controls-play-button,
+    video::-webkit-media-controls-overlay-play-button,
+    video::-webkit-media-controls-panel {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        left: -99999px !important;
+        top: -99999px !important;
+        width: 0px !important;
+        height: 0px !important;
+        z-index: -99999 !important;
+        transform: scale(0) !important;
+        -webkit-transform: scale(0) !important;
+    }
+    
+    /* Force no interactions on mobile */
+    video {
+        pointer-events: none !important;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        touch-action: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    
+    /* Hide any potential overlay buttons */
+    video::before,
+    video::after {
+        display: none !important;
+        content: none !important;
+    }
+}
+
+/* CHROME MOBILE SPECIFIC CONTROL HIDING */
+@media screen and (max-width: 768px) {
+    video::-webkit-media-controls-overlay-play-button {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        display: none !important;
+        position: absolute !important;
+        left: -99999px !important;
+        width: 0 !important;
+        height: 0 !important;
+        transform: scale(0) !important;
+        -webkit-transform: scale(0) !important;
+        z-index: -99999 !important;
+    }
+    
+    video::-webkit-media-controls-start-playback-button {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        display: none !important;
+        position: absolute !important;
+        left: -99999px !important;
+        width: 0 !important;
+        height: 0 !important;
+        transform: scale(0) !important;
+        -webkit-transform: scale(0) !important;
+        z-index: -99999 !important;
+    }
+    
+    /* Ensure videos are completely uninteractable */
+    .hero-video,
+    .showcase-video {
+        pointer-events: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        touch-action: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
 }
 
 /* Canvas fallback for mobile video */
