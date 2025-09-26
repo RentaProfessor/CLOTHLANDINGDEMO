@@ -12,7 +12,13 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
+    
+    <!-- Force autoplay permissions -->
+    <meta http-equiv="Feature-Policy" content="autoplay 'self'">
+    <meta name="autoplay-policy" content="allowed">
     <title>CLOTH - Premium Streetwear</title>
     <link rel="stylesheet" href="styles.css?v=1.7">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -54,7 +60,7 @@
                  x5-video-player-type="h5"
                  x5-video-player-fullscreen="false"
                  x5-video-orientation="portraint"
-                 preload="auto"
+                 preload="metadata"
                  class="hero-video"
                  allow="autoplay; fullscreen"
                  data-setup='{"fluid": true}'
@@ -145,7 +151,7 @@
                      x5-video-player-type="h5"
                      x5-video-player-fullscreen="false"
                      x5-video-orientation="portraint"
-                     preload="auto"
+                     preload="metadata"
                      class="showcase-video"
                      allow="autoplay; fullscreen"
                      data-setup='{"fluid": true}'

@@ -294,6 +294,64 @@ document.addEventListener('DOMContentLoaded', function() {
     setupVideo('hero-video', 'hero-canvas');
     setupVideo('showcase-video', 'showcase-canvas');
     
+    // IMMEDIATE VIDEO AUTOPLAY - Intersection Observer approach
+    const videoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const video = entry.target;
+                const videoId = video.id;
+                
+                console.log(`Video ${videoId} is visible - forcing immediate play`);
+                
+                // Force immediate play when video becomes visible
+                video.muted = true;
+                video.volume = 0;
+                video.removeAttribute('controls');
+                video.style.opacity = '1';
+                video.style.display = 'block';
+                video.style.visibility = 'visible';
+                
+                // Multiple immediate play attempts
+                const playImmediately = () => {
+                    video.play().then(() => {
+                        console.log(`${videoId} IMMEDIATE AUTOPLAY SUCCESS`);
+                        video.style.opacity = '1';
+                        video.classList.add('playing');
+                        videoObserver.unobserve(video); // Stop observing once playing
+                    }).catch(() => {
+                        console.log(`${videoId} immediate play failed, retrying...`);
+                        // Retry immediately
+                        setTimeout(playImmediately, 10);
+                    });
+                };
+                
+                // Try playing immediately
+                playImmediately();
+                
+                // Also try with slight delays
+                setTimeout(playImmediately, 1);
+                setTimeout(playImmediately, 10);
+                setTimeout(playImmediately, 50);
+            }
+        });
+    }, {
+        threshold: 0.1, // Trigger when 10% of video is visible
+        rootMargin: '50px' // Start slightly before it's fully visible
+    });
+    
+    // Observe both videos immediately
+    const heroVideo = document.getElementById('hero-video');
+    const showcaseVideo = document.getElementById('showcase-video');
+    
+    if (heroVideo) {
+        videoObserver.observe(heroVideo);
+        console.log('Observing hero video for immediate autoplay');
+    }
+    if (showcaseVideo) {
+        videoObserver.observe(showcaseVideo);
+        console.log('Observing showcase video for immediate autoplay');
+    }
+    
     // Global fallback handlers
     let interactionTriggered = false;
     
@@ -386,11 +444,129 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // IMMEDIATE PAGE VISIBILITY AUTOPLAY
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            console.log('Page became visible - triggering immediate video autoplay');
+            
+            // Immediate play when page becomes visible
+            ['hero-video', 'showcase-video'].forEach(id => {
+                const video = document.getElementById(id);
+                if (video) {
+                    video.muted = true;
+                    video.volume = 0;
+                    video.removeAttribute('controls');
+                    video.style.opacity = '1';
+                    video.style.visibility = 'visible';
+                    
+                    // Multiple immediate attempts
+                    const immediatePlay = () => {
+                        video.play().then(() => {
+                            console.log(`${id} VISIBILITY AUTOPLAY SUCCESS`);
+                            video.style.opacity = '1';
+                        }).catch(() => {
+                            setTimeout(immediatePlay, 5);
+                        });
+                    };
+                    
+                    immediatePlay();
+                    setTimeout(immediatePlay, 1);
+                    setTimeout(immediatePlay, 10);
+                    setTimeout(immediatePlay, 50);
+                }
+            });
+        }
+    });
+    
+    // IMMEDIATE FOCUS AUTOPLAY
+    window.addEventListener('focus', () => {
+        console.log('Window focused - triggering immediate video autoplay');
+        
+        ['hero-video', 'showcase-video'].forEach(id => {
+            const video = document.getElementById(id);
+            if (video && video.paused) {
+                video.muted = true;
+                video.play().then(() => {
+                    console.log(`${id} FOCUS AUTOPLAY SUCCESS`);
+                }).catch(() => {});
+            }
+        });
+    });
+    
+    // PROVEN MOBILE AUTOPLAY METHODS
+    
+    // Method 1: Immediate play on ANY touch/scroll (most sites use this)
+    let autoplayTriggered = false;
+    
+    function triggerImmediateAutoplay(event) {
+        if (autoplayTriggered) return;
+        autoplayTriggered = true;
+        
+        console.log('User interaction detected - immediate autoplay');
+        
+        ['hero-video', 'showcase-video'].forEach(id => {
+            const video = document.getElementById(id);
+            if (video) {
+                video.muted = true;
+                video.volume = 0;
+                video.style.opacity = '1';
+                video.style.visibility = 'visible';
+                
+                // Immediate play
+                video.play().then(() => {
+                    console.log(`${id} IMMEDIATE SUCCESS via ${event.type}`);
+                    video.style.opacity = '1';
+                }).catch(e => {
+                    console.log(`${id} failed:`, e.name);
+                });
+            }
+        });
+    }
+    
+    // Capture EVERYTHING - this is what mobile sites do
+    const events = ['touchstart', 'touchmove', 'touchend', 'click', 'scroll', 'mousemove', 'keydown', 'wheel'];
+    events.forEach(eventType => {
+        document.addEventListener(eventType, triggerImmediateAutoplay, { 
+            once: true, 
+            passive: true, 
+            capture: true 
+        });
+    });
+    
+    // Method 2: Play on window load (when page is fully ready)
+    window.addEventListener('load', () => {
+        console.log('Window loaded - attempting autoplay');
+        setTimeout(() => {
+            ['hero-video', 'showcase-video'].forEach(id => {
+                const video = document.getElementById(id);
+                if (video && video.paused) {
+                    video.muted = true;
+                    video.play().catch(() => {});
+                }
+            });
+        }, 100);
+    });
+    
+    // Method 3: Play when page becomes interactive
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                ['hero-video', 'showcase-video'].forEach(id => {
+                    const video = document.getElementById(id);
+                    if (video && video.paused) {
+                        video.muted = true;
+                        video.play().catch(() => {});
+                    }
+                });
+            }, 500);
+        });
+    }
+    
     // Force immediate execution on iOS
     if (isiOS) {
         setTimeout(() => {
             playAllVideos();
-        }, 500);
+        }, 100);
     }
 });
 
