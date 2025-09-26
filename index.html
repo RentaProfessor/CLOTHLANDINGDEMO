@@ -56,7 +56,10 @@
                  playsinline
                  preload="auto"
                  class="hero-video">
-                 <source src="Videos/MAINHERO_hq.mp4?t=1727316000" type="video/mp4">
+                 <!-- Desktop: High Quality -->
+                 <source src="Videos/MAINHERO_desktop.mp4?v=7.0" type="video/mp4" media="(min-width: 769px)">
+                 <!-- Mobile: Compressed -->
+                 <source src="Videos/MAINHERO_mobile.mp4?v=7.0" type="video/mp4">
                  Your browser does not support the video tag.
              </video>
              <canvas id="hero-canvas" class="video-canvas" style="display:none;"></canvas>
@@ -135,7 +138,10 @@
                      playsinline
                      preload="auto"
                      class="showcase-video">
-                     <source src="Videos/LOWERVIDEO_hq.mp4?t=1727316000" type="video/mp4">
+                     <!-- Desktop: Good Quality -->
+                     <source src="Videos/LOWERVIDEO_desktop.mp4?v=7.0" type="video/mp4" media="(min-width: 769px)">
+                     <!-- Mobile: Compressed -->
+                     <source src="Videos/LOWERVIDEO_mobile.mp4?v=7.0" type="video/mp4">
                      Your browser does not support the video tag.
                  </video>
                  <canvas id="showcase-canvas" class="video-canvas" style="display:none;"></canvas>
