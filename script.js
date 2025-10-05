@@ -199,14 +199,22 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Mobile-specific styling to ensure background behavior
         if (isMobile) {
-            video.style.position = 'absolute';
-            video.style.top = '0';
-            video.style.left = '0';
-            video.style.width = '100%';
-            video.style.height = '100%';
-            video.style.objectFit = 'cover';
-            video.style.zIndex = '-1';
-            video.style.background = '#000';
+            if (video.id === 'hero-video') {
+                video.style.position = 'absolute';
+                video.style.top = '0';
+                video.style.left = '0';
+                video.style.width = '100%';
+                video.style.height = '100vh';
+                video.style.objectFit = 'cover';
+                video.style.zIndex = '1';
+                video.style.background = '#000';
+            } else if (video.id === 'showcase-video') {
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+                video.style.zIndex = '1';
+                video.style.background = '#000';
+            }
         }
         
         // AGGRESSIVE play function

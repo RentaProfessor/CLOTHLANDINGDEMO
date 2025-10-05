@@ -20,6 +20,7 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
+    width: 100vw;
 }
 
 .container {
@@ -129,22 +130,27 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
 }
 
 .hero-video-container {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     z-index: 1;
     overflow: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 .hero-video {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
-    object-fit: fill;
+    object-fit: cover;
     object-position: center center;
     opacity: 1;
     background: #000;
@@ -152,6 +158,12 @@ body {
     -webkit-backface-visibility: hidden;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
 }
 
 /* Basic video styling */
@@ -273,16 +285,23 @@ video {
         content: none !important;
     }
     
-    /* Ensure videos act as background elements */
-    .hero-video,
-    .showcase-video {
+    /* Ensure videos act as background elements but maintain proper sizing */
+    .hero-video {
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
         width: 100% !important;
+        height: 100vh !important;
+        object-fit: cover !important;
+        z-index: 1 !important;
+        background: #000 !important;
+    }
+    
+    .showcase-video {
+        width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
-        z-index: -1 !important;
+        z-index: 1 !important;
         background: #000 !important;
     }
 }
@@ -317,9 +336,8 @@ video {
         z-index: -99999 !important;
     }
     
-    /* Ensure videos are completely uninteractable and act as background */
-    .hero-video,
-    .showcase-video {
+    /* Ensure videos are completely uninteractable but maintain proper sizing */
+    .hero-video {
         pointer-events: none !important;
         -webkit-user-select: none !important;
         user-select: none !important;
@@ -332,9 +350,25 @@ video {
         top: 0 !important;
         left: 0 !important;
         width: 100% !important;
+        height: 100vh !important;
+        object-fit: cover !important;
+        z-index: 1 !important;
+        background: #000 !important;
+    }
+    
+    .showcase-video {
+        pointer-events: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        touch-action: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-context-menu: none !important;
+        context-menu: none !important;
+        width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
-        z-index: -1 !important;
+        z-index: 1 !important;
         background: #000 !important;
     }
     
@@ -400,17 +434,26 @@ video {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 5;
+    pointer-events: none;
+    margin: 0;
+    padding: 0;
 }
 
 .hero-content {
     text-align: center;
-    z-index: 1;
+    z-index: 10;
     max-width: 800px;
     padding: 0 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 90vw;
 }
 
 .hero-title {
@@ -569,27 +612,27 @@ video {
 
 /* Video Showcase */
 .video-showcase {
-    padding: 100px 0;
+    padding: 20px 0;
     background: #000000;
 }
 
 .video-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 0;
 }
 
 .video-item {
     position: relative;
-    border-radius: 15px;
+    border-radius: 0;
     overflow: hidden;
-    height: 500px;
+    height: 350px;
 }
 
 .showcase-video {
     width: 100%;
-    height: auto;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
     object-position: center center;
     opacity: 1;
     background: #000;
@@ -982,19 +1025,33 @@ body.in-iframe .showcase-video {
         overflow: hidden;
     }
     
-    .hero-video,
+    .hero-video {
+        object-position: center center;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        will-change: auto;
+        width: 100%;
+        height: 100vh;
+        object-fit: cover;
+    }
+    
     .showcase-video {
         object-position: center center;
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
         will-change: auto;
-        min-width: 100%;
-        min-height: 100%;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     
     .video-item {
-        height: 300px;
+        height: 250px;
         overflow: hidden;
+    }
+    
+    .video-showcase {
+        padding: 0;
     }
     
     /* Force hardware acceleration on mobile */
@@ -1023,6 +1080,10 @@ body.in-iframe .showcase-video {
     }
     
     .video-item {
-        height: 300px;
+        height: 200px;
+    }
+    
+    .video-showcase {
+        padding: 0;
     }
 } 
