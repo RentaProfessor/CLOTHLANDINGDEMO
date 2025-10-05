@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Force reload with new source
         video.load();
         
-        // FORCE all necessary attributes
+        // FORCE all necessary attributes for mobile background behavior
         video.muted = true;
         video.volume = 0;
         video.autoplay = true;
@@ -169,19 +169,45 @@ document.addEventListener('DOMContentLoaded', function() {
         video.controls = false;
         video.preload = 'auto';
         
-        // REMOVE problematic attributes
+        // REMOVE problematic attributes and add mobile-specific ones
         video.removeAttribute('controls');
         video.removeAttribute('poster');
         video.setAttribute('webkit-playsinline', '');
         video.setAttribute('playsinline', '');
         video.setAttribute('x5-playsinline', '');
+        video.setAttribute('disablepictureinpicture', '');
+        video.setAttribute('controls', 'false');
         
-        // FORCE visibility and remove pointer events
+        // Mobile-specific attributes to prevent controls
+        if (isMobile) {
+            video.setAttribute('webkit-playsinline', 'true');
+            video.setAttribute('playsinline', 'true');
+            video.setAttribute('x5-playsinline', 'true');
+            video.setAttribute('x5-video-player-type', 'h5');
+            video.setAttribute('x5-video-player-fullscreen', 'false');
+            video.setAttribute('x5-video-orientation', 'portraint');
+        }
+        
+        // FORCE visibility and remove pointer events - MOBILE BACKGROUND BEHAVIOR
         video.style.pointerEvents = 'none';
         video.style.userSelect = 'none';
         video.style.webkitUserSelect = 'none';
         video.style.touchAction = 'none';
         video.style.webkitTouchCallout = 'none';
+        video.style.webkitContextMenu = 'none';
+        video.style.contextMenu = 'none';
+        
+        // Mobile-specific styling to ensure background behavior
+        if (isMobile) {
+            video.style.position = 'absolute';
+            video.style.top = '0';
+            video.style.left = '0';
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            video.style.zIndex = '-1';
+            video.style.background = '#000';
+        }
         
         // AGGRESSIVE play function
         function aggressivePlay() {
@@ -412,6 +438,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 video.setAttribute('playsinline', 'true');
                 video.webkitEnterFullscreen = undefined;
                 video.webkitExitFullscreen = undefined;
+            }
+        });
+    }
+    
+    // MOBILE-SPECIFIC BACKGROUND VIDEO ENFORCEMENT
+    if (isMobile) {
+        console.log('📱 Mobile detected - enforcing background video behavior');
+        
+        allVideos.forEach(video => {
+            if (video) {
+                // Override any potential control displays
+                const originalPlay = video.play;
+                video.play = function() {
+                    this.muted = true;
+                    this.volume = 0;
+                    this.controls = false;
+                    this.removeAttribute('controls');
+                    return originalPlay.call(this);
+                };
+                
+                // Prevent any control interactions
+                video.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                });
+                
+                video.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                });
+                
+                // Force background styling
+                video.style.pointerEvents = 'none';
+                video.style.userSelect = 'none';
+                video.style.webkitUserSelect = 'none';
+                video.style.touchAction = 'none';
+                video.style.webkitTouchCallout = 'none';
+                video.style.webkitContextMenu = 'none';
+                video.style.contextMenu = 'none';
             }
         });
     }
