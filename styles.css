@@ -564,6 +564,15 @@ video {
     gap: 2rem;
 }
 
+/* Desktop 2x2 grid layout */
+@media (min-width: 769px) {
+    .collection-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+}
+
 .collection-item {
     background: #111111;
     border-radius: 10px;
